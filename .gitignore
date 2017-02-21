@@ -1,0 +1,8 @@
+node_modules/
+coverage/
+dist/
+tmp/
+npm-debug.log*
+coverage.json
+.DS_Store
+*.swp

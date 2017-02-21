@@ -1,0 +1,16 @@
+{
+  "name": "state",
+  "version": "1.0.0",
+  "description": "State management",
+  "main": "example.js",
+  "scripts": {
+    "test": "tape ./src/*.spec.js | tap-spec"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "budo": "^9.4.7",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.6.3"
+  }
+}
