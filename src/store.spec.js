@@ -12,6 +12,7 @@ test('store / return / methods contain reducers', function (t) {
   t.equal(typeof app.methods, 'object', 'methods is an object')
   t.equal(typeof app.methods.myReducer, 'function', 'reducer exists inside methods')
 })
+test.skip('store / return / state is available')
 
 // Reducers
 test('store / reducers / receive state', function (t) {
@@ -104,14 +105,81 @@ test.skip('store / effects / can be chained when using callbacks', function (t) 
 })
 
 // Composition
-test.skip('store / composition / composition merges state together', function (t) {
+test('store / composition / composition merges state together', function (t) {
+  t.plan(2)
+  const app = store({
+    state: {
+      foo: 'foo'
+    },
+    models: {
+      bar: {
+        state: {
+          baz: 'baz'
+        }
+      }
+    }
+  })
+  t.equal(app.state.foo, 'foo', 'parent state is okay')
+  if (app.state.bar) {
+    t.equal(app.state.bar.baz, 'baz', 'child state is okay')
+  } else {
+    t.fail('child state has not been merged')
+  }
 })
-test.skip('store / composition / composition works with methods', function (t) {
+test('store / composition / composition works with methods', function (t) {
+  t.plan(2)
+  const app = store({
+    reducers: {
+      foo: noop
+    },
+    models: {
+      bar: {
+        reducers: {
+          baz: noop
+        }
+      }
+    }
+  })
+  t.equal(typeof app.methods.foo, 'function', 'parent methods are okay')
+  if (app.methods.bar) {
+    t.equal(typeof app.methods.bar.baz, 'function', 'child methods are okay')
+  } else {
+    t.fail('child method has not been merged')
+  }
 })
-test.skip('store / composition / reducers receive local state', function (t) {
+test('store / composition / reducers receive state', function (t) {
+  t.plan(4)
+  const app = store({
+    state: {
+      foo: 'foo'
+    },
+    reducers: {
+      foo (state) {
+        t.equal(state.foo, 'foo', 'parent reducer received state')
+        t.equal(state.bar.baz, 'baz', 'parent reducer can access child state')
+      }
+    },
+    models: {
+      bar: {
+        state: {
+          baz: 'baz'
+        },
+        reducers: {
+          baz (state) {
+            t.equal(state.bar.baz, 'baz', 'child reducer received state')
+            t.equal(state.foo, 'foo', 'child reducer cannot access parent state')
+          }
+        }
+      }
+    }
+  })
+  app.subscribe(noop)
+  app.methods.foo()
+  app.methods.bar.baz()
 })
-test.skip('store / composition / effects receive local state', function (t) {
+test.skip('store / composition / effects receive state', function (t) {
 })
+// Not sure whether to implement these below
 test.skip('store / composition / register child model at run time calls subscribe with merged state', function (t) {
   t.plan(3)
   const app = store({
