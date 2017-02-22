@@ -91,17 +91,102 @@ test('store / subscription / receives updated state as the first argument', func
 })
 
 // Effects
-test.skip('store / effects / receive state', function (t) {
+test('store / effects / receive state', function (t) {
+  t.plan(1)
+  const app = store({
+    state: {
+      title: 'not set'
+    },
+    effects: {
+      setTitle (state) {
+        t.equal(state.title, 'not set', 'reducer received state')
+      }
+    }
+  })
+  app.subscribe(noop)
+  app.methods.setTitle()
 })
-test.skip('store / effects / receive other methods', function (t) {
+test('store / effects / receive other methods', function (t) {
+  t.plan(2)
+  const app = store({
+    state: {},
+    reducers: {
+      foo: noop
+    },
+    effects: {
+      myOtherEffect: noop,
+      setTitle (state, methods) {
+        t.equal(typeof methods.foo, 'function', 'effect received other reducer method')
+        t.equal(typeof methods.myOtherEffect, 'function', 'effect received other effect method')
+      }
+    }
+  })
+  app.subscribe(noop)
+  app.methods.setTitle()
 })
-test.skip('store / effects / receive multiple arguments', function (t) {
+test('store / effects / receive multiple arguments', function (t) {
+  t.plan(3)
+  const app = store({
+    state: {},
+    effects: {
+      foo (state, methods, foo, bar, baz) {
+        t.equal(foo, 'foo', 'effect received first argument')
+        t.equal(bar, 'bar', 'effect received second argument')
+        t.equal(baz, 'baz', 'effect received third argument')
+      }
+    }
+  })
+  app.subscribe(noop)
+  app.methods.foo('foo', 'bar', 'baz')
 })
-test.skip('store / effects / return from invocation', function (t) {
+test('store / effects / return from invocation', function (t) {
+  t.plan(1)
+  const app = store({
+    state: {},
+    effects: {
+      foo () {
+        return 123
+      }
+    }
+  })
+  app.subscribe(noop)
+  t.equal(typeof app.methods.foo(), 'number', 'effect returned from invocation')
 })
-test.skip('store / effects / can be chained when using promises', function (t) {
+test('store / effects / can be chained when using promises', function (t) {
+  t.plan(1)
+  const app = store({
+    state: {},
+    effects: {
+      foo () {
+        return Promise.resolve()
+      },
+      bar () {
+        t.pass('the second effect was called after the first effects returned promise resolved')
+      }
+    }
+  })
+  app.subscribe(noop)
+  app.methods.foo()
+    .then(() => app.methods.bar())
 })
-test.skip('store / effects / can be chained when using callbacks', function (t) {
+test('store / effects / can be chained when using callbacks', function (t) {
+  t.plan(1)
+  const app = store({
+    state: {},
+    effects: {
+      foo (state, methods, foo, done) {
+        done(foo)
+        return foo
+      },
+      bar () {
+        t.pass('the second effect was called after the first effects callback was called')
+      }
+    }
+  })
+  app.subscribe(noop)
+  app.methods.foo('foo', () => {
+    app.methods.bar()
+  })
 })
 
 // Composition
@@ -178,6 +263,8 @@ test('store / composition / reducers receive state', function (t) {
   app.methods.bar.baz()
 })
 test.skip('store / composition / effects receive state', function (t) {
+})
+test.skip('store / composition / effects receive child methods', function (t) {
 })
 // Not sure whether to implement these below
 test.skip('store / composition / register child model at run time calls subscribe with merged state', function (t) {

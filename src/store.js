@@ -18,10 +18,12 @@ function createState (model) {
 }
 
 module.exports = function (model) {
+  let state = createState(model)
+  let methods = createMethods(model, state)
   let notify
 
-  function decorateReducers (reducers) {
-    return Object.keys(reducers || {}).map(key => {
+  function decorateMethods (reducers, effects) {
+    const decoratedReducers = Object.keys(reducers || {}).map(key => {
       return {
         [key]: function () {
           let newState = reducers[key](state, ...arguments)
@@ -29,30 +31,32 @@ module.exports = function (model) {
           return newState
         }
       }
-    }).reduce((curr, prev) => {
+    })
+    const decoratedEffects = Object.keys(effects || {}).map(key => {
+      return {
+        [key]: function () {
+          return effects[key](state, methods, ...arguments)
+        }
+      }
+    })
+    return decoratedReducers.concat(decoratedEffects).reduce((curr, prev) => {
       return Object.assign({}, curr, prev)
     }, {})
   }
 
   function createMethods (model) {
     if (model.models) {
-      let child = Object.keys(model.models).map(key => {
+      const child = Object.keys(model.models).map(key => {
         return {
           [key]: createMethods(model.models[key])
         }
       }).reduce((curr, prev) => {
         return Object.assign({}, curr, prev)
       }, {})
-
-      return Object.assign({}, decorateReducers(model.reducers), child)
+      return Object.assign({}, decorateMethods(model.reducers, model.effects), child)
     }
-    return decorateReducers(model.reducers)
+    return decorateMethods(model.reducers, model.effects)
   }
-
-  let state = createState(model)
-  let methods = createMethods(model)
-
-
 
   return {
     state,
