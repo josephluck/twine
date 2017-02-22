@@ -166,15 +166,17 @@ test('store / subscription / called on state changes', function (t) {
   })
   app.methods.myReducer()
 })
-test('store / subscription / receives updated state as the first argument', function (t) {
-  t.plan(1)
-  const checkState = function (state) {
-    t.equal(state, 'foo', 'received updated state')
+test('store / subscription / receives new state and prev state', function (t) {
+  t.plan(2)
+  const checkState = function (newState, oldState) {
+    t.equal(oldState, 'not set', 'received previous state')
+    t.equal(newState, 'set', 'received new state')
   }
   const app = store(checkState)({
+    state: 'not set',
     reducers: {
       myReducer () {
-        return 'foo'
+        return 'set'
       }
     }
   })
