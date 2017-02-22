@@ -26,9 +26,9 @@ module.exports = function (model) {
     const decoratedReducers = Object.keys(reducers || {}).map(key => {
       return {
         [key]: function () {
-          let newState = reducers[key](state, ...arguments)
-          notify(newState)
-          return newState
+          state = reducers[key](state, ...arguments)
+          notify(state)
+          return state
         }
       }
     })

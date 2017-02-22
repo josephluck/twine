@@ -2,6 +2,38 @@ const test = require('tape')
 const store = require('./store')
 const noop = () => null
 
+// Readme examples
+test('store / readme / example 1', function (t) {
+  t.plan(3)
+  const app = store({
+    state: {
+      title: 'foo'
+    },
+    reducers: {
+      update (state, title) {
+        return {
+          title: title
+        }
+      }
+    },
+    effects: {
+      async (state, methods, timeout) {
+        setTimeout(function () {
+          t.equal(typeof methods.update, 'function', 'effect called and received methods')
+          t.equal(state.title, 'bar', 'effect called and received latest state')
+        }, timeout)
+      }
+    }
+  })
+
+  app.subscribe(function (state) {
+    t.equal(state.title, 'bar')
+  })
+  app.methods.update('bar')
+  app.methods.async(1000)
+})
+
+// Return of store setup
 test('store / return / methods contain reducers', function (t) {
   t.plan(2)
   const app = store({
@@ -29,6 +61,27 @@ test('store / reducers / receive state', function (t) {
   })
   app.subscribe(noop)
   app.methods.setTitle()
+})
+test('store / reducers / receive latest state', function (t) {
+  t.plan(1)
+  const app = store({
+    state: {
+      title: 'not set'
+    },
+    reducers: {
+      updateTitle (state, title) {
+        return {
+          title: title
+        }
+      },
+      checkLatestState (state) {
+        t.equal(state.title, 'updated title', 'reducer received latest state')
+      }
+    }
+  })
+  app.subscribe(noop)
+  app.methods.updateTitle('updated title')
+  app.methods.checkLatestState()
 })
 test('store / reducers / receive multiple arguments', function (t) {
   t.plan(2)
@@ -105,6 +158,29 @@ test('store / effects / receive state', function (t) {
   })
   app.subscribe(noop)
   app.methods.setTitle()
+})
+test('store / effects / receive latest state', function (t) {
+  t.plan(1)
+  const app = store({
+    state: {
+      title: 'not set'
+    },
+    reducers: {
+      updateTitle (state, title) {
+        return {
+          title: title
+        }
+      }
+    },
+    effects: {
+      checkLatestState (state) {
+        t.equal(state.title, 'updated title', 'reducer received state')
+      }
+    }
+  })
+  app.subscribe(noop)
+  app.methods.updateTitle('updated title')
+  app.methods.checkLatestState()
 })
 test('store / effects / receive other methods', function (t) {
   t.plan(2)
@@ -242,6 +318,7 @@ test('store / composition / reducers receive state', function (t) {
       foo (state) {
         t.equal(state.foo, 'foo', 'parent reducer received state')
         t.equal(state.bar.baz, 'baz', 'parent reducer can access child state')
+        return state
       }
     },
     models: {
@@ -253,6 +330,7 @@ test('store / composition / reducers receive state', function (t) {
           baz (state) {
             t.equal(state.bar.baz, 'baz', 'child reducer received state')
             t.equal(state.foo, 'foo', 'child reducer cannot access parent state')
+            return state
           }
         }
       }
