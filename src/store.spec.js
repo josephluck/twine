@@ -30,7 +30,7 @@ test('store / readme / example 1', function (t) {
   }
   const app = store(subscription)(model)
   app.methods.update('bar')
-  app.methods.async(1000)
+  app.methods.async(1)
 })
 test('store / readme / example 2', function (t) {
   t.plan(6)

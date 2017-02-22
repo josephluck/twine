@@ -22,9 +22,8 @@ function createState (model) {
 }
 
 module.exports = function (opts = noop) {
-  let notify = typeof opts === 'function' ? opts : opts.subscription || noop
+  let onStateChange = typeof opts === 'function' ? opts : opts.onStateChange || noop
   let onMethodCall = typeof opts === 'function' ? noop : opts.onMethodCall || noop
-  let onStateChange = typeof opts === 'function' ? noop : opts.onStateChange || noop
 
   return function (model) {
     let state = createState(model)
@@ -35,7 +34,6 @@ module.exports = function (opts = noop) {
         return {
           [key]: function () {
             newState = reducers[key](state, ...arguments)
-            notify(newState)
             onStateChange(newState, state)
             onMethodCall(newState, state, ...arguments)
             state = newState
