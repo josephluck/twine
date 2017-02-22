@@ -33,7 +33,7 @@ module.exports = function (opts = noop) {
       const decoratedReducers = Object.keys(reducers || {}).map(key => {
         return {
           [key]: function () {
-            newState = reducers[key](state, ...arguments)
+            let newState = reducers[key](state, ...arguments)
             onStateChange(newState, state)
             onMethodCall(newState, state, ...arguments)
             state = newState
