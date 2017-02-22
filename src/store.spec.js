@@ -181,6 +181,37 @@ test('store / subscription / receives updated state as the first argument', func
   app.methods.myReducer()
 })
 
+// Hooks
+test('store / hooks', function (t) {
+  t.plan(7)
+  const hooks = {
+    onMethodCall (state, prev, ...args) {
+      t.pass('hook called on method call')
+      t.equal(prev.title, 'not set', 'onMethodCall hook received correct prev state')
+      t.equal(state.title, 'set', 'onMethodCall hook received correct new state')
+      t.equal(args[0], 'set', 'onMethodCall hook received arguments')
+    },
+    onStateChange (state, prev) {
+      t.pass('hook called on state change')
+      t.equal(prev.title, 'not set', 'onStateChange hook received correct prev state')
+      t.equal(state.title, 'set', 'onStateChange hook received correct new state')
+    }
+  }
+  const app = store(hooks)({
+    state: {
+      title: 'not set'
+    },
+    reducers: {
+      setTitle (state, title) {
+        return {
+          title: title
+        }
+      }
+    }
+  })
+  app.methods.setTitle('set')
+})
+
 // Effects
 test('store / effects / receive state', function (t) {
   t.plan(1)
