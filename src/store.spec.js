@@ -33,7 +33,7 @@ test('store / readme / example 1', function (t) {
   app.methods.async(1000)
 })
 test('store / readme / example 2', function (t) {
-  t.plan(3)
+  t.plan(6)
   const app = store()({
     state: {
       foo: 'foo'
@@ -71,6 +71,9 @@ test('store / readme / example 2', function (t) {
   app.methods.foo()
   app.methods.levelTwo.foo()
   app.methods.levelTwo.levelThree.foo()
+  t.equal(app.state.foo, 'foo', 'level one state is correct')
+  t.equal(app.state.levelTwo.foo, 'bar', 'level two state is correct')
+  t.equal(app.state.levelTwo.levelThree.foo, 'baz', 'level three state is correct')
 })
 
 // Return of store setup
@@ -433,7 +436,7 @@ test('store / composition / effects receive child methods', function (t) {
     }
   })
   app.methods.foo()
-  app.methods.foo()
+  app.methods.bar.baz()
 })
 
 // Not sure whether to implement run-time registrations

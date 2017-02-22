@@ -71,4 +71,7 @@ Composing models together
   store.methods.foo() // calls parent model reducer
   store.methods.levelTwo.foo() // calls child model reducer
   store.methods.levelTwo.levelThree.foo() // calls child model reducer
+  store.state.foo // logs 'foo'
+  store.state.levelTwo.foo // logs 'bar'
+  store.state.levelTwo.levelThree.foo // logs 'baz'
 ```
