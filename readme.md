@@ -40,7 +40,7 @@ Composing models together
 
 ```javascript
   const tansu = require('tansu')
-  const store = tansu({
+  const store = tansu()({
     state: {
       foo: 'foo'
     },
@@ -58,8 +58,6 @@ Composing models together
       }
     }
   })
-  console.log(store.state.foo) // logs 'foo'
-  console.log(store.state.foo.myOtherModel.bar) // logs 'bar'
   store.methods.foo() // calls parent model reducer
   store.methods.myOtherModel.bar() // calls child model reducer
 ```
