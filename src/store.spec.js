@@ -262,9 +262,75 @@ test('store / composition / reducers receive state', function (t) {
   app.methods.foo()
   app.methods.bar.baz()
 })
-test.skip('store / composition / effects receive state', function (t) {
+test('store / composition / effects receive state', function (t) {
+  t.plan(4)
+  const app = store({
+    state: {
+      foo: 'foo'
+    },
+    effects: {
+      foo (state) {
+        t.equal(state.foo, 'foo', 'parent effect received state')
+        t.equal(state.bar.baz, 'baz', 'parent effect can access child state')
+      }
+    },
+    models: {
+      bar: {
+        state: {
+          baz: 'baz'
+        },
+        effects: {
+          baz (state) {
+            t.equal(state.bar.baz, 'baz', 'child effect received state')
+            t.equal(state.foo, 'foo', 'child effect cannot access parent state')
+          }
+        }
+      }
+    }
+  })
+  app.subscribe(noop)
+  app.methods.foo()
+  app.methods.bar.baz()
 })
-test.skip('store / composition / effects receive child methods', function (t) {
+test('store / composition / effects receive child methods', function (t) {
+  t.plan(8)
+  const app = store({
+    state: {
+      foo: 'foo'
+    },
+    reducers: {
+      qaz: noop
+    },
+    effects: {
+      foo (state, methods) {
+        t.equal(typeof methods.foo, 'function', 'parent effect can call parent effect')
+        t.equal(typeof methods.qaz, 'function', 'parent effect can call parent reducer')
+        t.equal(typeof methods.bar.baz, 'function', 'parent effect can call child effect')
+        t.equal(typeof methods.bar.quuz, 'function', 'parent effect can call child reducer')
+      }
+    },
+    models: {
+      bar: {
+        state: {
+          baz: 'baz'
+        },
+        reducers: {
+          quuz: noop
+        },
+        effects: {
+          baz (state, methods) {
+            t.equal(typeof methods.foo, 'function', 'child effect can call parent effect')
+            t.equal(typeof methods.qaz, 'function', 'child effect can call parent reducer')
+            t.equal(typeof methods.bar.baz, 'function', 'child effect can call child effect')
+            t.equal(typeof methods.bar.quuz, 'function', 'child effect can call child reducer')
+          }
+        }
+      }
+    }
+  })
+  app.subscribe(noop)
+  app.methods.foo()
+  app.methods.foo()
 })
 // Not sure whether to implement these below
 test.skip('store / composition / register child model at run time calls subscribe with merged state', function (t) {
@@ -307,4 +373,16 @@ test.skip('store / composition / register child model at run time allows methods
     app.methods.myReducer(() => t.pass('parent reducer was called'))
     app.methods.foo.myNestedReducer(() => t.pass('child reducer was called'))
   }, 10)
+})
+test.skip('store / scoped / reducers receive local state', function (t) {
+})
+test.skip('store / scoped / effects receive local state', function (t) {
+})
+test.skip('store / scoped / effects receive local methods', function (t) {
+})
+test.skip('store / scoped / reducers return local state', function (t) {
+})
+test.skip('store / scoped / reducers update local state effecting global state', function (t) {
+})
+test.skip('store / scoped / subscribe called when reducer returns', function (t) {
 })
