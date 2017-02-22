@@ -48,16 +48,27 @@ Composing models together
       foo: function () {}
     },
     models: {
-      myOtherModel: {
+      levelTwo: {
         state: {
-          bar: 'bar'
+          foo: 'bar'
         },
         reducers: {
-          bar: function () {}
+          foo: function () {}
+        },
+        models: {
+          levelThree: {
+            state: {
+              foo: 'baz'
+            },
+            reducers: {
+              foo: function () {}
+            }
+          }
         }
       }
     }
   })
   store.methods.foo() // calls parent model reducer
-  store.methods.myOtherModel.bar() // calls child model reducer
+  store.methods.levelTwo.foo() // calls child model reducer
+  store.methods.levelTwo.levelThree.foo() // calls child model reducer
 ```

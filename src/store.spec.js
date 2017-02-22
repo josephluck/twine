@@ -32,6 +32,46 @@ test('store / readme / example 1', function (t) {
   app.methods.update('bar')
   app.methods.async(1000)
 })
+test('store / readme / example 2', function (t) {
+  t.plan(3)
+  const app = store()({
+    state: {
+      foo: 'foo'
+    },
+    reducers: {
+      foo: function () {
+        t.pass('level one reducer called')
+      }
+    },
+    models: {
+      levelTwo: {
+        state: {
+          foo: 'bar'
+        },
+        reducers: {
+          foo: function () {
+            t.pass('level two reducer called')
+          }
+        },
+        models: {
+          levelThree: {
+            state: {
+              foo: 'baz'
+            },
+            reducers: {
+              foo: function () {
+                t.pass('level three reducer called')
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  app.methods.foo()
+  app.methods.levelTwo.foo()
+  app.methods.levelTwo.levelThree.foo()
+})
 
 // Return of store setup
 test('store / return / methods contain reducers', function (t) {
