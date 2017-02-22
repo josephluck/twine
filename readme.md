@@ -4,7 +4,10 @@ Single model useage:
 
 ```javascript
   const tansu = require('tansu')
-  const store = tansu({
+  const subscription = function (state) {
+    console.log('the state updated: ' + state.title)
+  }
+  const model = {
     state: {
       title: 'foo'
     },
@@ -25,11 +28,8 @@ Single model useage:
         })
       }
     }
-  })
-
-  store.subscribe(function (state) {
-    console.log('the state updated: ' + state.title)
-  })
+  }
+  const store = tansu(subscription)(model)
 
   console.log('the initial title is: ' + store.state.title) // logs 'the initial state is: foo'
   store.methods.update('bar') // logs 'the state updated: bar'

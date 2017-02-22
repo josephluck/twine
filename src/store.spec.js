@@ -5,7 +5,10 @@ const noop = () => null
 // Readme examples
 test('store / readme / example 1', function (t) {
   t.plan(3)
-  const app = store({
+  const subscription = function (state) {
+    t.equal(state.title, 'bar')
+  }
+  const model = {
     state: {
       title: 'foo'
     },
@@ -24,11 +27,8 @@ test('store / readme / example 1', function (t) {
         }, timeout)
       }
     }
-  })
-
-  app.subscribe(function (state) {
-    t.equal(state.title, 'bar')
-  })
+  }
+  const app = store(subscription)(model)
   app.methods.update('bar')
   app.methods.async(1000)
 })
@@ -36,7 +36,7 @@ test('store / readme / example 1', function (t) {
 // Return of store setup
 test('store / return / methods contain reducers', function (t) {
   t.plan(2)
-  const app = store({
+  const app = store()({
     reducers: {
       myReducer () {}
     }
@@ -44,12 +44,12 @@ test('store / return / methods contain reducers', function (t) {
   t.equal(typeof app.methods, 'object', 'methods is an object')
   t.equal(typeof app.methods.myReducer, 'function', 'reducer exists inside methods')
 })
-test.skip('store / return / state is available')
+test.skip('skip / store / return / state is available')
 
 // Reducers
 test('store / reducers / receive state', function (t) {
   t.plan(1)
-  const app = store({
+  const app = store()({
     state: {
       title: 'not set'
     },
@@ -59,12 +59,11 @@ test('store / reducers / receive state', function (t) {
       }
     }
   })
-  app.subscribe(noop)
   app.methods.setTitle()
 })
 test('store / reducers / receive latest state', function (t) {
   t.plan(1)
-  const app = store({
+  const app = store()({
     state: {
       title: 'not set'
     },
@@ -79,13 +78,12 @@ test('store / reducers / receive latest state', function (t) {
       }
     }
   })
-  app.subscribe(noop)
   app.methods.updateTitle('updated title')
   app.methods.checkLatestState()
 })
 test('store / reducers / receive multiple arguments', function (t) {
   t.plan(2)
-  const app = store({
+  const app = store()({
     reducers: {
       setTitle (state, title, other) {
         t.equal(title, 'foo', 'first argument is okay')
@@ -93,12 +91,11 @@ test('store / reducers / receive multiple arguments', function (t) {
       }
     }
   })
-  app.subscribe(noop)
   app.methods.setTitle('foo', 123)
 })
 test('store / reducers / return from invocation', function (t) {
   t.plan(2)
-  const app = store({
+  const app = store()({
     reducers: {
       firstReducer (state, title) {
         return title
@@ -108,7 +105,6 @@ test('store / reducers / return from invocation', function (t) {
       }
     }
   })
-  app.subscribe(noop)
   const firstReducerReturn = app.methods.firstReducer('bar')
   t.equal(firstReducerReturn, 'bar', 'first reducer returned correctly')
   const secondReducerReturn = app.methods.secondReducer()
@@ -118,27 +114,26 @@ test('store / reducers / return from invocation', function (t) {
 // Subscription
 test('store / subscription / called on state changes', function (t) {
   t.plan(1)
-  const app = store({
+  const app = store(t.pass)({
     reducers: {
       myReducer () {
         return 'subscription called'
       }
     }
   })
-  app.subscribe(t.pass)
   app.methods.myReducer()
 })
 test('store / subscription / receives updated state as the first argument', function (t) {
   t.plan(1)
-  const app = store({
+  const checkState = function (state) {
+    t.equal(state, 'foo', 'received updated state')
+  }
+  const app = store(checkState)({
     reducers: {
       myReducer () {
         return 'foo'
       }
     }
-  })
-  app.subscribe(function (state) {
-    t.equal(state, 'foo', 'received updated state')
   })
   app.methods.myReducer()
 })
@@ -146,7 +141,7 @@ test('store / subscription / receives updated state as the first argument', func
 // Effects
 test('store / effects / receive state', function (t) {
   t.plan(1)
-  const app = store({
+  const app = store()({
     state: {
       title: 'not set'
     },
@@ -156,12 +151,11 @@ test('store / effects / receive state', function (t) {
       }
     }
   })
-  app.subscribe(noop)
   app.methods.setTitle()
 })
 test('store / effects / receive latest state', function (t) {
   t.plan(1)
-  const app = store({
+  const app = store()({
     state: {
       title: 'not set'
     },
@@ -178,13 +172,12 @@ test('store / effects / receive latest state', function (t) {
       }
     }
   })
-  app.subscribe(noop)
   app.methods.updateTitle('updated title')
   app.methods.checkLatestState()
 })
 test('store / effects / receive other methods', function (t) {
   t.plan(2)
-  const app = store({
+  const app = store()({
     state: {},
     reducers: {
       foo: noop
@@ -197,12 +190,11 @@ test('store / effects / receive other methods', function (t) {
       }
     }
   })
-  app.subscribe(noop)
   app.methods.setTitle()
 })
 test('store / effects / receive multiple arguments', function (t) {
   t.plan(3)
-  const app = store({
+  const app = store()({
     state: {},
     effects: {
       foo (state, methods, foo, bar, baz) {
@@ -212,12 +204,11 @@ test('store / effects / receive multiple arguments', function (t) {
       }
     }
   })
-  app.subscribe(noop)
   app.methods.foo('foo', 'bar', 'baz')
 })
 test('store / effects / return from invocation', function (t) {
   t.plan(1)
-  const app = store({
+  const app = store()({
     state: {},
     effects: {
       foo () {
@@ -225,12 +216,11 @@ test('store / effects / return from invocation', function (t) {
       }
     }
   })
-  app.subscribe(noop)
   t.equal(typeof app.methods.foo(), 'number', 'effect returned from invocation')
 })
 test('store / effects / can be chained when using promises', function (t) {
   t.plan(1)
-  const app = store({
+  const app = store()({
     state: {},
     effects: {
       foo () {
@@ -241,13 +231,12 @@ test('store / effects / can be chained when using promises', function (t) {
       }
     }
   })
-  app.subscribe(noop)
   app.methods.foo()
     .then(() => app.methods.bar())
 })
 test('store / effects / can be chained when using callbacks', function (t) {
   t.plan(1)
-  const app = store({
+  const app = store()({
     state: {},
     effects: {
       foo (state, methods, foo, done) {
@@ -259,7 +248,6 @@ test('store / effects / can be chained when using callbacks', function (t) {
       }
     }
   })
-  app.subscribe(noop)
   app.methods.foo('foo', () => {
     app.methods.bar()
   })
@@ -268,7 +256,7 @@ test('store / effects / can be chained when using callbacks', function (t) {
 // Composition
 test('store / composition / composition merges state together', function (t) {
   t.plan(2)
-  const app = store({
+  const app = store()({
     state: {
       foo: 'foo'
     },
@@ -289,7 +277,7 @@ test('store / composition / composition merges state together', function (t) {
 })
 test('store / composition / composition works with methods', function (t) {
   t.plan(2)
-  const app = store({
+  const app = store()({
     reducers: {
       foo: noop
     },
@@ -310,7 +298,7 @@ test('store / composition / composition works with methods', function (t) {
 })
 test('store / composition / reducers receive state', function (t) {
   t.plan(4)
-  const app = store({
+  const app = store()({
     state: {
       foo: 'foo'
     },
@@ -336,13 +324,12 @@ test('store / composition / reducers receive state', function (t) {
       }
     }
   })
-  app.subscribe(noop)
   app.methods.foo()
   app.methods.bar.baz()
 })
 test('store / composition / effects receive state', function (t) {
   t.plan(4)
-  const app = store({
+  const app = store()({
     state: {
       foo: 'foo'
     },
@@ -366,13 +353,12 @@ test('store / composition / effects receive state', function (t) {
       }
     }
   })
-  app.subscribe(noop)
   app.methods.foo()
   app.methods.bar.baz()
 })
 test('store / composition / effects receive child methods', function (t) {
   t.plan(8)
-  const app = store({
+  const app = store()({
     state: {
       foo: 'foo'
     },
@@ -406,7 +392,6 @@ test('store / composition / effects receive child methods', function (t) {
       }
     }
   })
-  app.subscribe(noop)
   app.methods.foo()
   app.methods.foo()
 })
