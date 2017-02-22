@@ -1,5 +1,5 @@
 {
-  "name": "Tansu",
+  "name": "tansu",
   "version": "1.0.0",
   "description": "State management",
   "main": "dist/index.js",
