@@ -1,5 +1,5 @@
 const test = require('tape')
-const store = require('./store')
+const store = require('./src/index')
 const noop = () => null
 
 // Readme examples
@@ -526,5 +526,5 @@ test.skip('store / scoped / reducers return local state', function (t) {
 })
 test.skip('store / scoped / reducers update local state effecting global state', function (t) {
 })
-test.skip('store / scoped / subscribe called when reducer returns', function (t) {
+test.skip('store / scoped / hooks still work as expected with global state', function (t) {
 })
