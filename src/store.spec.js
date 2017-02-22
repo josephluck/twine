@@ -332,7 +332,8 @@ test('store / composition / effects receive child methods', function (t) {
   app.methods.foo()
   app.methods.foo()
 })
-// Not sure whether to implement these below
+
+// Not sure whether to implement run-time registrations
 test.skip('store / composition / register child model at run time calls subscribe with merged state', function (t) {
   t.plan(3)
   const app = store({
@@ -374,6 +375,8 @@ test.skip('store / composition / register child model at run time allows methods
     app.methods.foo.myNestedReducer(() => t.pass('child reducer was called'))
   }, 10)
 })
+
+// Scoping
 test.skip('store / scoped / reducers receive local state', function (t) {
 })
 test.skip('store / scoped / effects receive local state', function (t) {

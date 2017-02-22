@@ -20,7 +20,7 @@ function createState (model) {
 module.exports = function (model) {
   let state = createState(model)
   let methods = createMethods(model, state)
-  let notify
+  let notify = function () {}
 
   function decorateMethods (reducers, effects) {
     const decoratedReducers = Object.keys(reducers || {}).map(key => {
