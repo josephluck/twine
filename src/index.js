@@ -75,7 +75,6 @@ module.exports = function (opts = noop) {
               return effects[key](effectState, effectMethods, ...arguments)
             }
             return effects[key](state, methods, ...arguments)
-            // onMethodCall(state, ...arguments)
           }
         }
       })
