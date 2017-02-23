@@ -1,5 +1,5 @@
 const test = require('tape')
-const store = require('./src/index')
+const store = require('./index')
 const noop = () => null
 
 // Readme examples
@@ -516,7 +516,27 @@ test.skip('store / composition / register child model at run time allows methods
 })
 
 // Scoping
-test.skip('store / scoped / reducers receive local state', function (t) {
+test('store / scoped / reducers receive local state', function (t) {
+  t.plan(1)
+  const app = store()({
+    state: {
+      title: 'not set'
+    },
+    reducers: {},
+    models: {
+      counter: {
+        state: {
+          count: 1
+        },
+        reducers: {
+          increment (localState) {
+            t.equal(localState.count, 1, 'reducer received local state')
+          }
+        }
+      }
+    }
+  })
+  app.methods.counter.increment()
 })
 test.skip('store / scoped / effects receive local state', function (t) {
 })

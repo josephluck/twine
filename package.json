@@ -4,7 +4,7 @@
   "description": "State management",
   "main": "dist/index.js",
   "scripts": {
-    "test": "tape index.spec.js | tap-spec",
+    "test": "tape ./src/index.spec.js | tap-spec",
     "bundle": "babel src --out-dir dist"
   },
   "author": "Joseph Luck",

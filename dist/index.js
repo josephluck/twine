@@ -36,7 +36,7 @@ module.exports = function () {
     function decorateMethods(reducers, effects) {
       var decoratedReducers = Object.keys(reducers || {}).map(function (key) {
         return _defineProperty({}, key, function () {
-          newState = reducers[key].apply(reducers, [state].concat(Array.prototype.slice.call(arguments)));
+          var newState = reducers[key].apply(reducers, [state].concat(Array.prototype.slice.call(arguments)));
           onStateChange(newState, state);
           onMethodCall.apply(undefined, [newState, state].concat(Array.prototype.slice.call(arguments)));
           state = newState;
