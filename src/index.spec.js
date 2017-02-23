@@ -473,7 +473,7 @@ test('store / composition / effects receive child methods', function (t) {
 })
 
 // Not sure whether to implement run-time registrations
-test.skip('store / composition / register child model at run time calls subscribe with merged state', function (t) {
+test.skip('skip /store / composition / register child model at run time calls subscribe with merged state', function (t) {
   t.plan(3)
   const app = store({
     state: {
@@ -496,7 +496,7 @@ test.skip('store / composition / register child model at run time calls subscrib
     })
   }, 10)
 })
-test.skip('store / composition / register child model at run time allows methods from parent and child to be called', function (t) {
+test.skip('skip / store / composition / register child model at run time allows methods from parent and child to be called', function (t) {
   t.plan(2)
   const app = store({
     reducers: {
@@ -553,13 +553,87 @@ test('store / scoped / reducers receive local state', function (t) {
   app.methods.counter.increment()
   app.methods.counter.anotherModel.update()
 })
-test.skip('store / scoped / effects receive local state', function (t) {
+test('store / scoped / effects receive local state and methods', function (t) {
+  t.plan(4)
+  const app = store()({
+    state: {
+      title: 'not set'
+    },
+    reducers: {},
+    models: {
+      counter: {
+        scoped: true,
+        state: {
+          count: 1
+        },
+        reducers: {
+          foo () {}
+        },
+        effects: {
+          increment (localState, localMethods) {
+            t.equal(localState.count, 1, 'first level effect received local state')
+            t.equal(typeof localMethods.foo, 'function', 'first level effect received local methods')
+          }
+        },
+        models: {
+          anotherModel: {
+            scoped: true,
+            state: {
+              myState: 'hey'
+            },
+            reducers: {
+              bar () {}
+            },
+            effects: {
+              update (localState, localMethods) {
+                t.equal(localState.myState, 'hey', 'second level effect received local state')
+                t.equal(typeof localMethods.bar, 'function', 'second level effect received local methods')
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  app.methods.counter.increment()
+  app.methods.counter.anotherModel.update()
 })
-test.skip('store / scoped / effects receive local methods', function (t) {
+test('store / scoped / reducers update local state effecting global state', function (t) {
+  t.plan(1)
+  function subscribe (state) {
+    t.equal(state.counter.anotherModel.myState, 'updated', 'state updated')
+  }
+  const app = store(subscribe)({
+    state: {
+      title: 'not set'
+    },
+    reducers: {},
+    models: {
+      counter: {
+        scoped: true,
+        state: {
+          count: 1
+        },
+        reducers: {},
+        models: {
+          anotherModel: {
+            scoped: true,
+            state: {
+              myState: 'hey'
+            },
+            reducers: {
+              update (localState) {
+                return {
+                  myState: 'updated'
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  })
+  app.methods.counter.anotherModel.update()
 })
-test.skip('store / scoped / reducers return local state', function (t) {
-})
-test.skip('store / scoped / reducers update local state effecting global state', function (t) {
-})
-test.skip('store / scoped / hooks still work as expected with global state', function (t) {
+test.skip('skip / store / scoped / hooks still work as expected with global state', function (t) {
 })

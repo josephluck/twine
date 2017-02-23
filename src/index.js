@@ -1,3 +1,5 @@
+const dotProp = require('dot-prop');
+
 function noop () {
   return null
 }
@@ -23,6 +25,17 @@ function createState (model) {
   return merge(model, 'state')
 }
 
+function retrieveNestedModel (model, path, index = 0) {
+  if (model.models) {
+    let currModel = model.models[path[index]]
+    if (currModel && currModel.models && currModel.models[path[index + 1]]) {
+      return retrieveNestedModel(currModel, path, index + 1)
+    }
+    return currModel
+  }
+  return model
+}
+
 module.exports = function (opts = noop) {
   let onStateChange = typeof opts === 'function' ? opts : opts.onStateChange || noop
   let onMethodCall = typeof opts === 'function' ? noop : opts.onMethodCall || noop
@@ -31,11 +44,20 @@ module.exports = function (opts = noop) {
     let state = createState(model)
     let methods = createMethods(model, [])
 
-    function decorateMethods (reducers, effects) {
+    function decorateMethods (reducers, effects, path) {
       const decoratedReducers = Object.keys(reducers || {}).map(key => {
         return {
           [key]: function () {
-            let newState = reducers[key](state, ...arguments)
+            let newState
+            if (path.length) {
+              let nestedModel = retrieveNestedModel(model, path)
+              let localState = nestedModel.scoped ? nestedModel.state : state
+              let newLocalState = reducers[key](localState, ...arguments)
+              dotProp.set(state, path.join('.'), newLocalState)
+              newState = state
+            } else {
+              newState = reducers[key](state, ...arguments)
+            }
             onStateChange(newState, state)
             onMethodCall(newState, state, ...arguments)
             state = newState
@@ -46,8 +68,14 @@ module.exports = function (opts = noop) {
       const decoratedEffects = Object.keys(effects || {}).map(key => {
         return {
           [key]: function () {
-            onMethodCall(state, ...arguments)
+            if (path.length) {
+              let nestedModel = retrieveNestedModel(model, path)
+              let effectState = nestedModel.scoped ? nestedModel.state : state
+              let effectMethods = nestedModel.scoped ? dotProp.get(methods, path.join('.')) : methods
+              return effects[key](effectState, effectMethods, ...arguments)
+            }
             return effects[key](state, methods, ...arguments)
+            // onMethodCall(state, ...arguments)
           }
         }
       })
@@ -55,16 +83,15 @@ module.exports = function (opts = noop) {
     }
 
     function createMethods (model, path) {
-      console.log(path)
       if (model.models) {
         const child = Object.keys(model.models).map(key => {
           return {
             [key]: createMethods(model.models[key], (path).concat(key))
           }
         }).reduce(arrayToObj, {})
-        return Object.assign({}, decorateMethods(model.reducers, model.effects), child)
+        return Object.assign({}, decorateMethods(model.reducers, model.effects, path), child)
       }
-      return decorateMethods(model.reducers, model.effects)
+      return decorateMethods(model.reducers, model.effects, path)
     }
 
     return {
