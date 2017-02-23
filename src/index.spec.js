@@ -599,8 +599,11 @@ test('store / scoped / effects receive local state and methods', function (t) {
   app.methods.counter.anotherModel.update()
 })
 test('store / scoped / reducers update local state effecting global state', function (t) {
-  t.plan(1)
+  t.plan(4)
   function subscribe (state) {
+    t.equal(state.title, 'not set', 'title remains unchanged')
+    t.equal(state.counter.count, 1, 'count remains unchanged')
+    t.equal(state.foo.bar, 'baz', 'foo bar remains unchanged')
     t.equal(state.counter.anotherModel.myState, 'updated', 'state updated')
   }
   const app = store(subscribe)({
@@ -630,10 +633,18 @@ test('store / scoped / reducers update local state effecting global state', func
             }
           }
         }
+      },
+      foo: {
+        state: {
+          bar: 'baz'
+        }
       }
     }
   })
   app.methods.counter.anotherModel.update()
+})
+test.skip('store / scoped / effects receive local methods that update global state', function (t) {
+
 })
 test.skip('skip / store / scoped / hooks still work as expected with global state', function (t) {
 })
