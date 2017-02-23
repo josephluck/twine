@@ -2,15 +2,17 @@ function noop () {
   return null
 }
 
+function arrayToObj (curr, prev) {
+  return Object.assign({}, curr, prev)
+}
+
 function merge (model, prop) {
   if (model.models) {
     let child = Object.keys(model.models).map(key => {
       return {
         [key]: merge(model.models[key], prop)
       }
-    }).reduce((curr, prev) => {
-      return Object.assign({}, curr, prev)
-    }, {})
+    }).reduce(arrayToObj, {})
 
     return Object.assign({}, model[prop], child)
   }
@@ -27,7 +29,7 @@ module.exports = function (opts = noop) {
 
   return function (model) {
     let state = createState(model)
-    let methods = createMethods(model, state)
+    let methods = createMethods(model, [])
 
     function decorateMethods (reducers, effects) {
       const decoratedReducers = Object.keys(reducers || {}).map(key => {
@@ -49,20 +51,17 @@ module.exports = function (opts = noop) {
           }
         }
       })
-      return decoratedReducers.concat(decoratedEffects).reduce((curr, prev) => {
-        return Object.assign({}, curr, prev)
-      }, {})
+      return decoratedReducers.concat(decoratedEffects).reduce(arrayToObj, {})
     }
 
-    function createMethods (model) {
+    function createMethods (model, path) {
+      console.log(path)
       if (model.models) {
         const child = Object.keys(model.models).map(key => {
           return {
-            [key]: createMethods(model.models[key])
+            [key]: createMethods(model.models[key], (path).concat(key))
           }
-        }).reduce((curr, prev) => {
-          return Object.assign({}, curr, prev)
-        }, {})
+        }).reduce(arrayToObj, {})
         return Object.assign({}, decorateMethods(model.reducers, model.effects), child)
       }
       return decorateMethods(model.reducers, model.effects)

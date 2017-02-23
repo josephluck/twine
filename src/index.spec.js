@@ -517,7 +517,7 @@ test.skip('store / composition / register child model at run time allows methods
 
 // Scoping
 test('store / scoped / reducers receive local state', function (t) {
-  t.plan(1)
+  t.plan(2)
   const app = store()({
     state: {
       title: 'not set'
@@ -525,18 +525,33 @@ test('store / scoped / reducers receive local state', function (t) {
     reducers: {},
     models: {
       counter: {
+        scoped: true,
         state: {
           count: 1
         },
         reducers: {
           increment (localState) {
-            t.equal(localState.count, 1, 'reducer received local state')
+            t.equal(localState.count, 1, 'first level reducer received local state')
+          }
+        },
+        models: {
+          anotherModel: {
+            scoped: true,
+            state: {
+              myState: 'hey'
+            },
+            reducers: {
+              update (localState) {
+                t.equal(localState.myState, 'hey', 'second level reducer received local state')
+              }
+            }
           }
         }
       }
     }
   })
   app.methods.counter.increment()
+  app.methods.counter.anotherModel.update()
 })
 test.skip('store / scoped / effects receive local state', function (t) {
 })
