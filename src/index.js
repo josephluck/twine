@@ -50,9 +50,8 @@ module.exports = function (opts = noop) {
           [key]: function () {
             let newState
             if (path.length) {
-              let nestedModel = retrieveNestedModel(model, path)
-              let localState = nestedModel.scoped ? nestedModel.state : state
-              let newLocalState = reducers[key](localState, ...arguments)
+              let localState = retrieveNestedModel(model, path).scoped ? dotProp.get(state, path.join('.')) : state
+              let newLocalState = Object.assign({}, localState, reducers[key](localState, ...arguments))
               dotProp.set(state, path.join('.'), newLocalState)
               newState = state
             } else {

@@ -599,14 +599,14 @@ test('store / scoped / effects receive local state and methods', function (t) {
   app.methods.counter.anotherModel.update()
 })
 test('store / scoped / reducers update local state effecting global state', function (t) {
-  t.plan(4)
-  function subscribe (state) {
+  t.plan(8)
+  function subscribeOne (state) {
     t.equal(state.title, 'not set', 'title remains unchanged')
     t.equal(state.counter.count, 1, 'count remains unchanged')
     t.equal(state.foo.bar, 'baz', 'foo bar remains unchanged')
     t.equal(state.counter.anotherModel.myState, 'updated', 'state updated')
   }
-  const app = store(subscribe)({
+  const appOne = store(subscribeOne)({
     state: {
       title: 'not set'
     },
@@ -641,9 +641,53 @@ test('store / scoped / reducers update local state effecting global state', func
       }
     }
   })
-  app.methods.counter.anotherModel.update()
+  appOne.methods.counter.anotherModel.update()
+
+
+  function subscribeTwo (state) {
+    t.equal(state.title, 'not set', 'title remains unchanged')
+    t.equal(state.counter.count, 2, 'count updated')
+    t.equal(state.foo.bar, 'baz', 'foo bar remains unchanged')
+    t.equal(state.counter.anotherModel.myState, 'hey', 'state remains unchanged')
+  }
+  const appTwo = store(subscribeTwo)({
+    state: {
+      title: 'not set'
+    },
+    reducers: {},
+    models: {
+      counter: {
+        scoped: true,
+        state: {
+          count: 1
+        },
+        reducers: {
+          increment (state) {
+            return {
+              count: state.count + 1
+            }
+          }
+        },
+        models: {
+          anotherModel: {
+            scoped: true,
+            state: {
+              myState: 'hey'
+            },
+            reducers: {}
+          }
+        }
+      },
+      foo: {
+        state: {
+          bar: 'baz'
+        }
+      }
+    }
+  })
+  appTwo.methods.counter.increment()
 })
-test.skip('store / scoped / effects receive local methods that update global state', function (t) {
+test.skip('skip / store / scoped / effects receive local methods that update global state', function (t) {
 
 })
 test.skip('skip / store / scoped / hooks still work as expected with global state', function (t) {
