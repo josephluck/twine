@@ -31,5 +31,5 @@ export namespace Tansu {
     state: any
     methods: any
   }
-  export type ReturnOutput (model: Model) => Output
+  export type ReturnOutput = (model: Model) => Output
 }
