@@ -1,6 +1,6 @@
 require('es6-shim')
 import * as test from 'tape'
-import store from '../src/index'
+import store from '../src/tansu'
 const noop = () => null
 
 // Readme examples
