@@ -55,9 +55,8 @@ module.exports = function () {
         return _defineProperty({}, key, function () {
           var newState = void 0;
           if (path.length) {
-            var nestedModel = retrieveNestedModel(model, path);
-            var localState = nestedModel.scoped ? nestedModel.state : state;
-            var newLocalState = reducers[key].apply(reducers, [localState].concat(Array.prototype.slice.call(arguments)));
+            var localState = retrieveNestedModel(model, path).scoped ? dotProp.get(state, path.join('.')) : state;
+            var newLocalState = Object.assign({}, localState, reducers[key].apply(reducers, [localState].concat(Array.prototype.slice.call(arguments))));
             dotProp.set(state, path.join('.'), newLocalState);
             newState = state;
           } else {

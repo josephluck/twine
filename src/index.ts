@@ -54,9 +54,8 @@ export default function tansu (opts?: Tansu.Configuration): Tansu.ReturnOutput {
           [key]: function () {
             let newState
             if (path.length) {
-              let nestedModel = retrieveNestedModel(model, path)
-              let localState = nestedModel.scoped ? nestedModel.state : state
-              let newLocalState = reducers[key].apply(null, [localState].concat(Array.prototype.slice.call(arguments)))
+              let localState = retrieveNestedModel(model, path).scoped ? dotProp.get(state, path.join('.')) : state
+              let newLocalState = Object.assign({}, localState, reducers[key].apply(null, [localState].concat(Array.prototype.slice.call(arguments))))
               dotProp.set(state, path.join('.'), newLocalState)
               newState = state
             } else {
