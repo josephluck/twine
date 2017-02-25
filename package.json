@@ -4,8 +4,10 @@
   "description": "State management",
   "main": "dist/index.js",
   "scripts": {
-    "test": "tape ./src/index.spec.js | tap-spec",
-    "bundle": "babel src --out-dir dist"
+    "test": "ts-node node_modules/.bin/tape ./test/index.spec.ts | tap-spec",
+    "dist": "tsc && npm run browserify && npm run minify",
+    "browserify": "browserify -g babelify -g uglifyify dist/index.js -o dist/bundle.js",
+    "minify": "uglifyjs ./dist/bundle.js --compress --mangle -o ./dist/bundle.min.js"
   },
   "author": "Joseph Luck",
   "license": "ISC",
@@ -18,6 +20,14 @@
     "tape": "^4.6.3"
   },
   "dependencies": {
-    "dot-prop": "^4.1.1"
+    "@types/es6-shim": "^0.31.32",
+    "@types/node": "^7.0.5",
+    "dot-prop": "^4.1.1",
+    "es6-shim": "^0.35.3",
+    "ts-node": "^2.1.0",
+    "tsify": "^3.0.1",
+    "tslint": "^4.4.2",
+    "tslint-config-standard": "^4.0.0",
+    "typescript": "^2.2.1"
   }
 }

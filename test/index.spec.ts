@@ -1,5 +1,6 @@
-const test = require('tape')
-const store = require('./index')
+require('es6-shim')
+import * as test from 'tape'
+import store from '../src/index'
 const noop = () => null
 
 // Readme examples
@@ -10,12 +11,12 @@ test('store / readme / example 1', function (t) {
   }
   const model = {
     state: {
-      title: 'foo'
+      title: 'foo',
     },
     reducers: {
       update (state, title) {
         return {
-          title: title
+          title: title,
         }
       }
     },
@@ -25,8 +26,8 @@ test('store / readme / example 1', function (t) {
           t.equal(typeof methods.update, 'function', 'effect called and received methods')
           t.equal(state.title, 'bar', 'effect called and received latest state')
         }, timeout)
-      }
-    }
+      },
+    },
   }
   const app = store(subscription)(model)
   app.methods.update('bar')
@@ -36,37 +37,37 @@ test('store / readme / example 2', function (t) {
   t.plan(6)
   const app = store()({
     state: {
-      foo: 'foo'
+      foo: 'foo',
     },
     reducers: {
       foo: function () {
         t.pass('level one reducer called')
-      }
+      },
     },
     models: {
       levelTwo: {
         state: {
-          foo: 'bar'
+          foo: 'bar',
         },
         reducers: {
           foo: function () {
             t.pass('level two reducer called')
-          }
+          },
         },
         models: {
           levelThree: {
             state: {
-              foo: 'baz'
+              foo: 'baz',
             },
             reducers: {
               foo: function () {
                 t.pass('level three reducer called')
-              }
-            }
-          }
-        }
-      }
-    }
+              },
+            },
+          },
+        },
+      },
+    },
   })
   app.methods.foo()
   app.methods.levelTwo.foo()
@@ -80,9 +81,10 @@ test('store / readme / example 2', function (t) {
 test('store / return / methods contain reducers', function (t) {
   t.plan(2)
   const app = store()({
+    state: {},
     reducers: {
-      myReducer () {}
-    }
+      myReducer () { return null },
+    },
   })
   t.equal(typeof app.methods, 'object', 'methods is an object')
   t.equal(typeof app.methods.myReducer, 'function', 'reducer exists inside methods')
@@ -94,13 +96,13 @@ test('store / reducers / receive state', function (t) {
   t.plan(1)
   const app = store()({
     state: {
-      title: 'not set'
+      title: 'not set',
     },
     reducers: {
       setTitle (state) {
         t.equal(state.title, 'not set', 'reducer received state')
-      }
-    }
+      },
+    },
   })
   app.methods.setTitle()
 })
@@ -108,18 +110,18 @@ test('store / reducers / receive latest state', function (t) {
   t.plan(1)
   const app = store()({
     state: {
-      title: 'not set'
+      title: 'not set',
     },
     reducers: {
       updateTitle (state, title) {
         return {
-          title: title
+          title: title,
         }
       },
       checkLatestState (state) {
         t.equal(state.title, 'updated title', 'reducer received latest state')
-      }
-    }
+      },
+    },
   })
   app.methods.updateTitle('updated title')
   app.methods.checkLatestState()
@@ -127,26 +129,28 @@ test('store / reducers / receive latest state', function (t) {
 test('store / reducers / receive multiple arguments', function (t) {
   t.plan(2)
   const app = store()({
+    state: {},
     reducers: {
       setTitle (state, title, other) {
         t.equal(title, 'foo', 'first argument is okay')
         t.equal(other, 123, 'second argument is okay')
-      }
-    }
+      },
+    },
   })
   app.methods.setTitle('foo', 123)
 })
 test('store / reducers / return from invocation', function (t) {
   t.plan(2)
   const app = store()({
+    state: {},
     reducers: {
       firstReducer (state, title) {
         return title
       },
       secondReducer () {
         return 123
-      }
-    }
+      },
+    },
   })
   const firstReducerReturn = app.methods.firstReducer('bar')
   t.equal(firstReducerReturn, 'bar', 'first reducer returned correctly')
@@ -158,11 +162,12 @@ test('store / reducers / return from invocation', function (t) {
 test('store / subscription / called on state changes', function (t) {
   t.plan(1)
   const app = store(t.pass)({
+    state: {},
     reducers: {
       myReducer () {
         return 'subscription called'
-      }
-    }
+      },
+    },
   })
   app.methods.myReducer()
 })
@@ -177,8 +182,8 @@ test('store / subscription / receives new state and prev state', function (t) {
     reducers: {
       myReducer () {
         return 'set'
-      }
-    }
+      },
+    },
   })
   app.methods.myReducer()
 })
@@ -197,19 +202,19 @@ test('store / hooks', function (t) {
       t.pass('hook called on state change')
       t.equal(prev.title, 'not set', 'onStateChange hook received correct prev state')
       t.equal(state.title, 'set', 'onStateChange hook received correct new state')
-    }
+    },
   }
   const app = store(hooks)({
     state: {
-      title: 'not set'
+      title: 'not set',
     },
     reducers: {
       setTitle (state, title) {
         return {
-          title: title
+          title: title,
         }
-      }
-    }
+      },
+    },
   })
   app.methods.setTitle('set')
 })
@@ -219,13 +224,13 @@ test('store / effects / receive state', function (t) {
   t.plan(1)
   const app = store()({
     state: {
-      title: 'not set'
+      title: 'not set',
     },
     effects: {
       setTitle (state) {
         t.equal(state.title, 'not set', 'reducer received state')
-      }
-    }
+      },
+    },
   })
   app.methods.setTitle()
 })
@@ -233,20 +238,20 @@ test('store / effects / receive latest state', function (t) {
   t.plan(1)
   const app = store()({
     state: {
-      title: 'not set'
+      title: 'not set',
     },
     reducers: {
       updateTitle (state, title) {
         return {
-          title: title
+          title: title,
         }
-      }
+      },
     },
     effects: {
       checkLatestState (state) {
         t.equal(state.title, 'updated title', 'reducer received state')
-      }
-    }
+      },
+    },
   })
   app.methods.updateTitle('updated title')
   app.methods.checkLatestState()
@@ -256,15 +261,15 @@ test('store / effects / receive other methods', function (t) {
   const app = store()({
     state: {},
     reducers: {
-      foo: noop
+      foo: noop,
     },
     effects: {
       myOtherEffect: noop,
       setTitle (state, methods) {
         t.equal(typeof methods.foo, 'function', 'effect received other reducer method')
         t.equal(typeof methods.myOtherEffect, 'function', 'effect received other effect method')
-      }
-    }
+      },
+    },
   })
   app.methods.setTitle()
 })
@@ -277,8 +282,8 @@ test('store / effects / receive multiple arguments', function (t) {
         t.equal(foo, 'foo', 'effect received first argument')
         t.equal(bar, 'bar', 'effect received second argument')
         t.equal(baz, 'baz', 'effect received third argument')
-      }
-    }
+      },
+    },
   })
   app.methods.foo('foo', 'bar', 'baz')
 })
@@ -289,8 +294,8 @@ test('store / effects / return from invocation', function (t) {
     effects: {
       foo () {
         return 123
-      }
-    }
+      },
+    },
   })
   t.equal(typeof app.methods.foo(), 'number', 'effect returned from invocation')
 })
@@ -304,8 +309,8 @@ test('store / effects / can be chained when using promises', function (t) {
       },
       bar () {
         t.pass('the second effect was called after the first effects returned promise resolved')
-      }
-    }
+      },
+    },
   })
   app.methods.foo()
     .then(() => app.methods.bar())
@@ -316,13 +321,14 @@ test('store / effects / can be chained when using callbacks', function (t) {
     state: {},
     effects: {
       foo (state, methods, foo, done) {
+        console.log(foo, done)
         done(foo)
         return foo
       },
       bar () {
         t.pass('the second effect was called after the first effects callback was called')
-      }
-    }
+      },
+    },
   })
   app.methods.foo('foo', () => {
     app.methods.bar()
@@ -334,15 +340,15 @@ test('store / composition / composition merges state together', function (t) {
   t.plan(2)
   const app = store()({
     state: {
-      foo: 'foo'
+      foo: 'foo',
     },
     models: {
       bar: {
         state: {
-          baz: 'baz'
-        }
-      }
-    }
+          baz: 'baz',
+        },
+      },
+    },
   })
   t.equal(app.state.foo, 'foo', 'parent state is okay')
   if (app.state.bar) {
@@ -354,16 +360,18 @@ test('store / composition / composition merges state together', function (t) {
 test('store / composition / composition works with methods', function (t) {
   t.plan(2)
   const app = store()({
+    state: {},
     reducers: {
-      foo: noop
+      foo: noop,
     },
     models: {
       bar: {
+        state: {},
         reducers: {
-          baz: noop
-        }
-      }
-    }
+          baz: noop,
+        },
+      },
+    },
   })
   t.equal(typeof app.methods.foo, 'function', 'parent methods are okay')
   if (app.methods.bar) {
@@ -376,29 +384,29 @@ test('store / composition / reducers receive state', function (t) {
   t.plan(4)
   const app = store()({
     state: {
-      foo: 'foo'
+      foo: 'foo',
     },
     reducers: {
       foo (state) {
         t.equal(state.foo, 'foo', 'parent reducer received state')
         t.equal(state.bar.baz, 'baz', 'parent reducer can access child state')
         return state
-      }
+      },
     },
     models: {
       bar: {
         state: {
-          baz: 'baz'
+          baz: 'baz',
         },
         reducers: {
           baz (state) {
             t.equal(state.bar.baz, 'baz', 'child reducer received state')
             t.equal(state.foo, 'foo', 'child reducer cannot access parent state')
             return state
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   })
   app.methods.foo()
   app.methods.bar.baz()
@@ -407,27 +415,27 @@ test('store / composition / effects receive state', function (t) {
   t.plan(4)
   const app = store()({
     state: {
-      foo: 'foo'
+      foo: 'foo',
     },
     effects: {
       foo (state) {
         t.equal(state.foo, 'foo', 'parent effect received state')
         t.equal(state.bar.baz, 'baz', 'parent effect can access child state')
-      }
+      },
     },
     models: {
       bar: {
         state: {
-          baz: 'baz'
+          baz: 'baz',
         },
         effects: {
           baz (state) {
             t.equal(state.bar.baz, 'baz', 'child effect received state')
             t.equal(state.foo, 'foo', 'child effect cannot access parent state')
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   })
   app.methods.foo()
   app.methods.bar.baz()
@@ -436,10 +444,10 @@ test('store / composition / effects receive child methods', function (t) {
   t.plan(8)
   const app = store()({
     state: {
-      foo: 'foo'
+      foo: 'foo',
     },
     reducers: {
-      qaz: noop
+      qaz: noop,
     },
     effects: {
       foo (state, methods) {
@@ -447,15 +455,15 @@ test('store / composition / effects receive child methods', function (t) {
         t.equal(typeof methods.qaz, 'function', 'parent effect can call parent reducer')
         t.equal(typeof methods.bar.baz, 'function', 'parent effect can call child effect')
         t.equal(typeof methods.bar.quuz, 'function', 'parent effect can call child reducer')
-      }
+      },
     },
     models: {
       bar: {
         state: {
-          baz: 'baz'
+          baz: 'baz',
         },
         reducers: {
-          quuz: noop
+          quuz: noop,
         },
         effects: {
           baz (state, methods) {
@@ -463,56 +471,13 @@ test('store / composition / effects receive child methods', function (t) {
             t.equal(typeof methods.qaz, 'function', 'child effect can call parent reducer')
             t.equal(typeof methods.bar.baz, 'function', 'child effect can call child effect')
             t.equal(typeof methods.bar.quuz, 'function', 'child effect can call child reducer')
-          }
-        }
-      }
-    }
+          },
+        },
+      },
+    },
   })
   app.methods.foo()
   app.methods.bar.baz()
-})
-
-// Not sure whether to implement run-time registrations
-test.skip('skip /store / composition / register child model at run time calls subscribe with merged state', function (t) {
-  t.plan(3)
-  const app = store({
-    state: {
-      foo: 'foo'
-    },
-    reducers: {
-      myReducer: noop
-    }
-  })
-  app.subscribe((state) => {
-    t.pass('subscribe is called')
-    t.equal(state.foo, 'foo', 'parent model state is maintained')
-    t.equal(state.foo.bar, 'bar', 'child model state is merged')
-  })
-  setTimeout(() => {
-    app.models.register('bar', {
-      state: {
-        bar: 'bar'
-      }
-    })
-  }, 10)
-})
-test.skip('skip / store / composition / register child model at run time allows methods from parent and child to be called', function (t) {
-  t.plan(2)
-  const app = store({
-    reducers: {
-      myReducer: noop
-    }
-  })
-  app.subscribe(noop)
-  setTimeout(() => {
-    app.models.register('foo', {
-      reducers: {
-        myNestedReducer: noop
-      }
-    })
-    app.methods.myReducer(() => t.pass('parent reducer was called'))
-    app.methods.foo.myNestedReducer(() => t.pass('child reducer was called'))
-  }, 10)
 })
 
 // Scoping
@@ -520,35 +485,35 @@ test('store / scoped / reducers receive local state', function (t) {
   t.plan(2)
   const app = store()({
     state: {
-      title: 'not set'
+      title: 'not set',
     },
     reducers: {},
     models: {
       counter: {
         scoped: true,
         state: {
-          count: 1
+          count: 1,
         },
         reducers: {
           increment (localState) {
             t.equal(localState.count, 1, 'first level reducer received local state')
-          }
+          },
         },
         models: {
           anotherModel: {
             scoped: true,
             state: {
-              myState: 'hey'
+              myState: 'hey',
             },
             reducers: {
               update (localState) {
                 t.equal(localState.myState, 'hey', 'second level reducer received local state')
-              }
-            }
-          }
-        }
-      }
-    }
+              },
+            },
+          },
+        },
+      },
+    },
   })
   app.methods.counter.increment()
   app.methods.counter.anotherModel.update()
@@ -557,43 +522,43 @@ test('store / scoped / effects receive local state and methods', function (t) {
   t.plan(4)
   const app = store()({
     state: {
-      title: 'not set'
+      title: 'not set',
     },
     reducers: {},
     models: {
       counter: {
         scoped: true,
         state: {
-          count: 1
+          count: 1,
         },
         reducers: {
-          foo () {}
+          foo () {},
         },
         effects: {
           increment (localState, localMethods) {
             t.equal(localState.count, 1, 'first level effect received local state')
             t.equal(typeof localMethods.foo, 'function', 'first level effect received local methods')
-          }
+          },
         },
         models: {
           anotherModel: {
             scoped: true,
             state: {
-              myState: 'hey'
+              myState: 'hey',
             },
             reducers: {
-              bar () {}
+              bar () {},
             },
             effects: {
               update (localState, localMethods) {
                 t.equal(localState.myState, 'hey', 'second level effect received local state')
                 t.equal(typeof localMethods.bar, 'function', 'second level effect received local methods')
-              }
-            }
-          }
-        }
-      }
-    }
+              },
+            },
+          },
+        },
+      },
+    },
   })
   app.methods.counter.increment()
   app.methods.counter.anotherModel.update()
@@ -608,38 +573,38 @@ test('store / scoped / reducers update local state effecting global state', func
   }
   const app = store(subscribe)({
     state: {
-      title: 'not set'
+      title: 'not set',
     },
     reducers: {},
     models: {
       counter: {
         scoped: true,
         state: {
-          count: 1
+          count: 1,
         },
         reducers: {},
         models: {
           anotherModel: {
             scoped: true,
             state: {
-              myState: 'hey'
+              myState: 'hey',
             },
             reducers: {
               update (localState) {
                 return {
-                  myState: 'updated'
+                  myState: 'updated',
                 }
-              }
-            }
-          }
-        }
+              },
+            },
+          },
+        },
       },
       foo: {
         state: {
-          bar: 'baz'
-        }
-      }
-    }
+          bar: 'baz',
+        },
+      },
+    },
   })
   app.methods.counter.anotherModel.update()
 })

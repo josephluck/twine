@@ -63,7 +63,7 @@ module.exports = function () {
           } else {
             newState = reducers[key].apply(reducers, [state].concat(Array.prototype.slice.call(arguments)));
           }
-          onStateChange(newState, state);
+          onStateChange(newState, state, methods);
           onMethodCall.apply(undefined, [newState, state].concat(Array.prototype.slice.call(arguments)));
           state = newState;
           return newState;
