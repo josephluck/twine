@@ -73,7 +73,7 @@ export default function twine (opts?: Twine.Configuration): Twine.ReturnOutput {
           [key]: function () {
             if (path.length) {
               let nestedModel = retrieveNestedModel(model, path)
-              let effectState = nestedModel.scoped ? nestedModel.state : state
+              let effectState = nestedModel.scoped ? dotProp.get(state, path.join('.')) : state
               let effectActions = nestedModel.scoped ? dotProp.get(actions, path.join('.')) : actions
               return effects[key].apply(null, [effectState, effectActions].concat(Array.prototype.slice.call(arguments)))
             }

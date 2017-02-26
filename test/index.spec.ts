@@ -652,6 +652,34 @@ test('twine / scoped / reducers update local state effecting global state', func
   })
   appTwo.actions.counter.increment()
 })
+test('twine / scoped / effects receive latest local state', function (t) {
+  t.plan(1)
+  const app = twine()({
+    state: {},
+    models: {
+      scopedModel: {
+        scoped: true,
+        state: {
+          title: 'not set',
+        },
+        reducers: {
+          updateTitle (state, title) {
+            return {
+              title: title,
+            }
+          },
+        },
+        effects: {
+          checkLatestState (state) {
+            t.equal(state.title, 'updated title', 'reducer received state')
+          },
+        },
+      },
+    },
+  })
+  app.actions.scopedModel.updateTitle('updated title')
+  app.actions.scopedModel.checkLatestState()
+})
 test.skip('skip / twine / scoped / effects receive local actions that update global state', function (t) {
 
 })
