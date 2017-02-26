@@ -46,9 +46,9 @@ export default function twine (opts?: Twine.Configuration): Twine.ReturnOutput {
 
   return function output (model: Twine.Model): Twine.Output {
     let state = createState(model)
-    let methods = createMethods(model, [])
+    let actions = createActions(model, [])
 
-    function decorateMethods (reducers: Twine.Reducers, effects: Twine.Effects, path: string[]): Twine.Methods {
+    function decorateActions (reducers: Twine.Reducers, effects: Twine.Effects, path: string[]): Twine.Actions {
       const decoratedReducers = Object.keys(reducers || {}).map(key => {
         return {
           [key]: function () {
@@ -61,7 +61,7 @@ export default function twine (opts?: Twine.Configuration): Twine.ReturnOutput {
             } else {
               newState = reducers[key].apply(null, [state].concat(Array.prototype.slice.call(arguments)))
             }
-            onStateChange(newState, state, methods)
+            onStateChange(newState, state, actions)
             onMethodCall.apply(null, [newState, state].concat(Array.prototype.slice.call(arguments)))
             state = newState
             return newState
@@ -74,31 +74,31 @@ export default function twine (opts?: Twine.Configuration): Twine.ReturnOutput {
             if (path.length) {
               let nestedModel = retrieveNestedModel(model, path)
               let effectState = nestedModel.scoped ? nestedModel.state : state
-              let effectMethods = nestedModel.scoped ? dotProp.get(methods, path.join('.')) : methods
-              return effects[key].apply(null, [effectState, effectMethods].concat(Array.prototype.slice.call(arguments)))
+              let effectActions = nestedModel.scoped ? dotProp.get(actions, path.join('.')) : actions
+              return effects[key].apply(null, [effectState, effectActions].concat(Array.prototype.slice.call(arguments)))
             }
-            return effects[key].apply(null, [state, methods].concat(Array.prototype.slice.call(arguments)))
+            return effects[key].apply(null, [state, actions].concat(Array.prototype.slice.call(arguments)))
           },
         }
       })
       return decoratedReducers.concat(decoratedEffects).reduce(arrayToObj, {})
     }
 
-    function createMethods (model: Twine.Model, path: string[]): Twine.Methods {
+    function createActions (model: Twine.Model, path: string[]): Twine.Actions {
       if (model.models) {
         const child = Object.keys(model.models).map(key => {
           return {
-            [key]: createMethods(model.models[key], (path).concat(key)),
+            [key]: createActions(model.models[key], (path).concat(key)),
           }
         }).reduce(arrayToObj, {})
-        return Object.assign({}, decorateMethods(model.reducers, model.effects, path), child)
+        return Object.assign({}, decorateActions(model.reducers, model.effects, path), child)
       }
-      return decorateMethods(model.reducers, model.effects, path)
+      return decorateActions(model.reducers, model.effects, path)
     }
 
     return {
       state,
-      methods,
+      actions,
     }
   }
 }

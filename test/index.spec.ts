@@ -21,17 +21,17 @@ test('twine / readme / example 1', function (t) {
       }
     },
     effects: {
-      async (state, methods, timeout) {
+      async (state, actions, timeout) {
         setTimeout(function () {
-          t.equal(typeof methods.update, 'function', 'effect called and received methods')
+          t.equal(typeof actions.update, 'function', 'effect called and received actions')
           t.equal(state.title, 'bar', 'effect called and received latest state')
         }, timeout)
       },
     },
   }
   const app = twine(subscription)(model)
-  app.methods.update('bar')
-  app.methods.async(1)
+  app.actions.update('bar')
+  app.actions.async(1)
 })
 test('twine / readme / example 2', function (t) {
   t.plan(6)
@@ -69,16 +69,16 @@ test('twine / readme / example 2', function (t) {
       },
     },
   })
-  app.methods.foo()
-  app.methods.levelTwo.foo()
-  app.methods.levelTwo.levelThree.foo()
+  app.actions.foo()
+  app.actions.levelTwo.foo()
+  app.actions.levelTwo.levelThree.foo()
   t.equal(app.state.foo, 'foo', 'level one state is correct')
   t.equal(app.state.levelTwo.foo, 'bar', 'level two state is correct')
   t.equal(app.state.levelTwo.levelThree.foo, 'baz', 'level three state is correct')
 })
 
 // Return of twine setup
-test('twine / return / methods contain reducers', function (t) {
+test('twine / return / actions contain reducers', function (t) {
   t.plan(2)
   const app = twine()({
     state: {},
@@ -86,8 +86,8 @@ test('twine / return / methods contain reducers', function (t) {
       myReducer () { return null },
     },
   })
-  t.equal(typeof app.methods, 'object', 'methods is an object')
-  t.equal(typeof app.methods.myReducer, 'function', 'reducer exists inside methods')
+  t.equal(typeof app.actions, 'object', 'actions is an object')
+  t.equal(typeof app.actions.myReducer, 'function', 'reducer exists inside actions')
 })
 test.skip('skip / twine / return / state is available')
 
@@ -104,7 +104,7 @@ test('twine / reducers / receive state', function (t) {
       },
     },
   })
-  app.methods.setTitle()
+  app.actions.setTitle()
 })
 test('twine / reducers / receive latest state', function (t) {
   t.plan(1)
@@ -123,8 +123,8 @@ test('twine / reducers / receive latest state', function (t) {
       },
     },
   })
-  app.methods.updateTitle('updated title')
-  app.methods.checkLatestState()
+  app.actions.updateTitle('updated title')
+  app.actions.checkLatestState()
 })
 test('twine / reducers / receive multiple arguments', function (t) {
   t.plan(2)
@@ -137,7 +137,7 @@ test('twine / reducers / receive multiple arguments', function (t) {
       },
     },
   })
-  app.methods.setTitle('foo', 123)
+  app.actions.setTitle('foo', 123)
 })
 test('twine / reducers / return from invocation', function (t) {
   t.plan(2)
@@ -152,9 +152,9 @@ test('twine / reducers / return from invocation', function (t) {
       },
     },
   })
-  const firstReducerReturn = app.methods.firstReducer('bar')
+  const firstReducerReturn = app.actions.firstReducer('bar')
   t.equal(firstReducerReturn, 'bar', 'first reducer returned correctly')
-  const secondReducerReturn = app.methods.secondReducer()
+  const secondReducerReturn = app.actions.secondReducer()
   t.equal(typeof secondReducerReturn, 'number', 'second reducer returned correctly')
 })
 
@@ -169,7 +169,7 @@ test('twine / subscription / called on state changes', function (t) {
       },
     },
   })
-  app.methods.myReducer()
+  app.actions.myReducer()
 })
 test('twine / subscription / receives new state and prev state', function (t) {
   t.plan(2)
@@ -185,7 +185,7 @@ test('twine / subscription / receives new state and prev state', function (t) {
       },
     },
   })
-  app.methods.myReducer()
+  app.actions.myReducer()
 })
 
 // Hooks
@@ -216,7 +216,7 @@ test('twine / hooks', function (t) {
       },
     },
   })
-  app.methods.setTitle('set')
+  app.actions.setTitle('set')
 })
 
 // Effects
@@ -232,7 +232,7 @@ test('twine / effects / receive state', function (t) {
       },
     },
   })
-  app.methods.setTitle()
+  app.actions.setTitle()
 })
 test('twine / effects / receive latest state', function (t) {
   t.plan(1)
@@ -253,10 +253,10 @@ test('twine / effects / receive latest state', function (t) {
       },
     },
   })
-  app.methods.updateTitle('updated title')
-  app.methods.checkLatestState()
+  app.actions.updateTitle('updated title')
+  app.actions.checkLatestState()
 })
-test('twine / effects / receive other methods', function (t) {
+test('twine / effects / receive other actions', function (t) {
   t.plan(2)
   const app = twine()({
     state: {},
@@ -265,27 +265,27 @@ test('twine / effects / receive other methods', function (t) {
     },
     effects: {
       myOtherEffect: noop,
-      setTitle (state, methods) {
-        t.equal(typeof methods.foo, 'function', 'effect received other reducer method')
-        t.equal(typeof methods.myOtherEffect, 'function', 'effect received other effect method')
+      setTitle (state, actions) {
+        t.equal(typeof actions.foo, 'function', 'effect received other reducer method')
+        t.equal(typeof actions.myOtherEffect, 'function', 'effect received other effect method')
       },
     },
   })
-  app.methods.setTitle()
+  app.actions.setTitle()
 })
 test('twine / effects / receive multiple arguments', function (t) {
   t.plan(3)
   const app = twine()({
     state: {},
     effects: {
-      foo (state, methods, foo, bar, baz) {
+      foo (state, actions, foo, bar, baz) {
         t.equal(foo, 'foo', 'effect received first argument')
         t.equal(bar, 'bar', 'effect received second argument')
         t.equal(baz, 'baz', 'effect received third argument')
       },
     },
   })
-  app.methods.foo('foo', 'bar', 'baz')
+  app.actions.foo('foo', 'bar', 'baz')
 })
 test('twine / effects / return from invocation', function (t) {
   t.plan(1)
@@ -297,7 +297,7 @@ test('twine / effects / return from invocation', function (t) {
       },
     },
   })
-  t.equal(typeof app.methods.foo(), 'number', 'effect returned from invocation')
+  t.equal(typeof app.actions.foo(), 'number', 'effect returned from invocation')
 })
 test('twine / effects / can be chained when using promises', function (t) {
   t.plan(1)
@@ -312,15 +312,15 @@ test('twine / effects / can be chained when using promises', function (t) {
       },
     },
   })
-  app.methods.foo()
-    .then(() => app.methods.bar())
+  app.actions.foo()
+    .then(() => app.actions.bar())
 })
 test('twine / effects / can be chained when using callbacks', function (t) {
   t.plan(1)
   const app = twine()({
     state: {},
     effects: {
-      foo (state, methods, foo, done) {
+      foo (state, actions, foo, done) {
         console.log(foo, done)
         done(foo)
         return foo
@@ -330,8 +330,8 @@ test('twine / effects / can be chained when using callbacks', function (t) {
       },
     },
   })
-  app.methods.foo('foo', () => {
-    app.methods.bar()
+  app.actions.foo('foo', () => {
+    app.actions.bar()
   })
 })
 
@@ -357,7 +357,7 @@ test('twine / composition / composition merges state together', function (t) {
     t.fail('child state has not been merged')
   }
 })
-test('twine / composition / composition works with methods', function (t) {
+test('twine / composition / composition works with actions', function (t) {
   t.plan(2)
   const app = twine()({
     state: {},
@@ -373,9 +373,9 @@ test('twine / composition / composition works with methods', function (t) {
       },
     },
   })
-  t.equal(typeof app.methods.foo, 'function', 'parent methods are okay')
-  if (app.methods.bar) {
-    t.equal(typeof app.methods.bar.baz, 'function', 'child methods are okay')
+  t.equal(typeof app.actions.foo, 'function', 'parent actions are okay')
+  if (app.actions.bar) {
+    t.equal(typeof app.actions.bar.baz, 'function', 'child actions are okay')
   } else {
     t.fail('child method has not been merged')
   }
@@ -408,8 +408,8 @@ test('twine / composition / reducers receive state', function (t) {
       },
     },
   })
-  app.methods.foo()
-  app.methods.bar.baz()
+  app.actions.foo()
+  app.actions.bar.baz()
 })
 test('twine / composition / effects receive state', function (t) {
   t.plan(4)
@@ -437,10 +437,10 @@ test('twine / composition / effects receive state', function (t) {
       },
     },
   })
-  app.methods.foo()
-  app.methods.bar.baz()
+  app.actions.foo()
+  app.actions.bar.baz()
 })
-test('twine / composition / effects receive child methods', function (t) {
+test('twine / composition / effects receive child actions', function (t) {
   t.plan(8)
   const app = twine()({
     state: {
@@ -450,11 +450,11 @@ test('twine / composition / effects receive child methods', function (t) {
       qaz: noop,
     },
     effects: {
-      foo (state, methods) {
-        t.equal(typeof methods.foo, 'function', 'parent effect can call parent effect')
-        t.equal(typeof methods.qaz, 'function', 'parent effect can call parent reducer')
-        t.equal(typeof methods.bar.baz, 'function', 'parent effect can call child effect')
-        t.equal(typeof methods.bar.quuz, 'function', 'parent effect can call child reducer')
+      foo (state, actions) {
+        t.equal(typeof actions.foo, 'function', 'parent effect can call parent effect')
+        t.equal(typeof actions.qaz, 'function', 'parent effect can call parent reducer')
+        t.equal(typeof actions.bar.baz, 'function', 'parent effect can call child effect')
+        t.equal(typeof actions.bar.quuz, 'function', 'parent effect can call child reducer')
       },
     },
     models: {
@@ -466,18 +466,18 @@ test('twine / composition / effects receive child methods', function (t) {
           quuz: noop,
         },
         effects: {
-          baz (state, methods) {
-            t.equal(typeof methods.foo, 'function', 'child effect can call parent effect')
-            t.equal(typeof methods.qaz, 'function', 'child effect can call parent reducer')
-            t.equal(typeof methods.bar.baz, 'function', 'child effect can call child effect')
-            t.equal(typeof methods.bar.quuz, 'function', 'child effect can call child reducer')
+          baz (state, actions) {
+            t.equal(typeof actions.foo, 'function', 'child effect can call parent effect')
+            t.equal(typeof actions.qaz, 'function', 'child effect can call parent reducer')
+            t.equal(typeof actions.bar.baz, 'function', 'child effect can call child effect')
+            t.equal(typeof actions.bar.quuz, 'function', 'child effect can call child reducer')
           },
         },
       },
     },
   })
-  app.methods.foo()
-  app.methods.bar.baz()
+  app.actions.foo()
+  app.actions.bar.baz()
 })
 
 // Scoping
@@ -515,10 +515,10 @@ test('twine / scoped / reducers receive local state', function (t) {
       },
     },
   })
-  app.methods.counter.increment()
-  app.methods.counter.anotherModel.update()
+  app.actions.counter.increment()
+  app.actions.counter.anotherModel.update()
 })
-test('twine / scoped / effects receive local state and methods', function (t) {
+test('twine / scoped / effects receive local state and actions', function (t) {
   t.plan(4)
   const app = twine()({
     state: {
@@ -535,9 +535,9 @@ test('twine / scoped / effects receive local state and methods', function (t) {
           foo () {},
         },
         effects: {
-          increment (localState, localMethods) {
+          increment (localState, localActions) {
             t.equal(localState.count, 1, 'first level effect received local state')
-            t.equal(typeof localMethods.foo, 'function', 'first level effect received local methods')
+            t.equal(typeof localActions.foo, 'function', 'first level effect received local actions')
           },
         },
         models: {
@@ -550,9 +550,9 @@ test('twine / scoped / effects receive local state and methods', function (t) {
               bar () {},
             },
             effects: {
-              update (localState, localMethods) {
+              update (localState, localActions) {
                 t.equal(localState.myState, 'hey', 'second level effect received local state')
-                t.equal(typeof localMethods.bar, 'function', 'second level effect received local methods')
+                t.equal(typeof localActions.bar, 'function', 'second level effect received local actions')
               },
             },
           },
@@ -560,8 +560,8 @@ test('twine / scoped / effects receive local state and methods', function (t) {
       },
     },
   })
-  app.methods.counter.increment()
-  app.methods.counter.anotherModel.update()
+  app.actions.counter.increment()
+  app.actions.counter.anotherModel.update()
 })
 test('twine / scoped / reducers update local state effecting global state', function (t) {
   t.plan(8)
@@ -606,7 +606,7 @@ test('twine / scoped / reducers update local state effecting global state', func
       },
     },
   })
-  appOne.methods.counter.anotherModel.update()
+  appOne.actions.counter.anotherModel.update()
 
 
   function subscribeTwo (state) {
@@ -650,9 +650,9 @@ test('twine / scoped / reducers update local state effecting global state', func
       }
     }
   })
-  appTwo.methods.counter.increment()
+  appTwo.actions.counter.increment()
 })
-test.skip('skip / twine / scoped / effects receive local methods that update global state', function (t) {
+test.skip('skip / twine / scoped / effects receive local actions that update global state', function (t) {
 
 })
 test.skip('skip / twine / scoped / hooks still work as expected with global state', function (t) {
