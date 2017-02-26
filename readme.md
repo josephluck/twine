@@ -1,4 +1,4 @@
-# Another state management lib
+# Functional front-end UI state management
 
 Warning: this isn't a finished library! Use with caution.
 

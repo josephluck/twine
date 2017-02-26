@@ -1,5 +1,5 @@
 import * as dotProp from 'dot-prop'
-import { Tansu } from './types'
+import Twine from './types'
 
 function noop () {
   return null
@@ -9,11 +9,11 @@ function arrayToObj (curr, prev) {
   return Object.assign({}, curr, prev)
 }
 
-function merge (model: Tansu.Model, prop: string) {
+function merge (model: Twine.Model, prop: string) {
   if (model.models) {
     let child = Object.keys(model.models).map(key => {
       return {
-        [key]: merge(model.models[key], prop)
+        [key]: merge(model.models[key], prop),
       }
     }).reduce(arrayToObj, {})
 
@@ -22,11 +22,11 @@ function merge (model: Tansu.Model, prop: string) {
   return model[prop]
 }
 
-function createState (model: Tansu.Model): Tansu.State {
+function createState (model: Twine.Model): Twine.State {
   return merge(model, 'state')
 }
 
-function retrieveNestedModel (model: Tansu.Model, path: string[], index: number = 0): Tansu.Model {
+function retrieveNestedModel (model: Twine.Model, path: string[], index: number = 0): Twine.Model {
   if (model.models) {
     let currModel = model.models[path[index]]
     if (currModel && currModel.models && currModel.models[path[index + 1]]) {
@@ -37,18 +37,18 @@ function retrieveNestedModel (model: Tansu.Model, path: string[], index: number 
   return model
 }
 
-export default function tansu (opts?: Tansu.Configuration): Tansu.ReturnOutput {
+export default function twine (opts?: Twine.Configuration): Twine.ReturnOutput {
   if (!opts) {
     opts = noop
   }
   let onStateChange = typeof opts === 'function' ? opts : opts.onStateChange || noop
   let onMethodCall = typeof opts === 'function' ? noop : opts.onMethodCall || noop
 
-  return function output (model: Tansu.Model): Tansu.Output {
+  return function output (model: Twine.Model): Twine.Output {
     let state = createState(model)
     let methods = createMethods(model, [])
 
-    function decorateMethods (reducers: Tansu.Reducers, effects: Tansu.Effects, path: string[]): Tansu.Methods {
+    function decorateMethods (reducers: Twine.Reducers, effects: Twine.Effects, path: string[]): Twine.Methods {
       const decoratedReducers = Object.keys(reducers || {}).map(key => {
         return {
           [key]: function () {
@@ -65,7 +65,7 @@ export default function tansu (opts?: Tansu.Configuration): Tansu.ReturnOutput {
             onMethodCall.apply(null, [newState, state].concat(Array.prototype.slice.call(arguments)))
             state = newState
             return newState
-          }
+          },
         }
       })
       const decoratedEffects = Object.keys(effects || {}).map(key => {
@@ -78,17 +78,17 @@ export default function tansu (opts?: Tansu.Configuration): Tansu.ReturnOutput {
               return effects[key].apply(null, [effectState, effectMethods].concat(Array.prototype.slice.call(arguments)))
             }
             return effects[key].apply(null, [state, methods].concat(Array.prototype.slice.call(arguments)))
-          }
+          },
         }
       })
       return decoratedReducers.concat(decoratedEffects).reduce(arrayToObj, {})
     }
 
-    function createMethods (model: Tansu.Model, path: string[]): Tansu.Methods {
+    function createMethods (model: Twine.Model, path: string[]): Twine.Methods {
       if (model.models) {
         const child = Object.keys(model.models).map(key => {
           return {
-            [key]: createMethods(model.models[key], (path).concat(key))
+            [key]: createMethods(model.models[key], (path).concat(key)),
           }
         }).reduce(arrayToObj, {})
         return Object.assign({}, decorateMethods(model.reducers, model.effects, path), child)

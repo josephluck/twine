@@ -1,10 +1,10 @@
 require('es6-shim')
 import * as test from 'tape'
-import store from '../src/tansu'
+import twine from '../src/index'
 const noop = () => null
 
 // Readme examples
-test('store / readme / example 1', function (t) {
+test('twine / readme / example 1', function (t) {
   t.plan(3)
   const subscription = function (state) {
     t.equal(state.title, 'bar')
@@ -29,13 +29,13 @@ test('store / readme / example 1', function (t) {
       },
     },
   }
-  const app = store(subscription)(model)
+  const app = twine(subscription)(model)
   app.methods.update('bar')
   app.methods.async(1)
 })
-test('store / readme / example 2', function (t) {
+test('twine / readme / example 2', function (t) {
   t.plan(6)
-  const app = store()({
+  const app = twine()({
     state: {
       foo: 'foo',
     },
@@ -77,10 +77,10 @@ test('store / readme / example 2', function (t) {
   t.equal(app.state.levelTwo.levelThree.foo, 'baz', 'level three state is correct')
 })
 
-// Return of store setup
-test('store / return / methods contain reducers', function (t) {
+// Return of twine setup
+test('twine / return / methods contain reducers', function (t) {
   t.plan(2)
-  const app = store()({
+  const app = twine()({
     state: {},
     reducers: {
       myReducer () { return null },
@@ -89,12 +89,12 @@ test('store / return / methods contain reducers', function (t) {
   t.equal(typeof app.methods, 'object', 'methods is an object')
   t.equal(typeof app.methods.myReducer, 'function', 'reducer exists inside methods')
 })
-test.skip('skip / store / return / state is available')
+test.skip('skip / twine / return / state is available')
 
 // Reducers
-test('store / reducers / receive state', function (t) {
+test('twine / reducers / receive state', function (t) {
   t.plan(1)
-  const app = store()({
+  const app = twine()({
     state: {
       title: 'not set',
     },
@@ -106,9 +106,9 @@ test('store / reducers / receive state', function (t) {
   })
   app.methods.setTitle()
 })
-test('store / reducers / receive latest state', function (t) {
+test('twine / reducers / receive latest state', function (t) {
   t.plan(1)
-  const app = store()({
+  const app = twine()({
     state: {
       title: 'not set',
     },
@@ -126,9 +126,9 @@ test('store / reducers / receive latest state', function (t) {
   app.methods.updateTitle('updated title')
   app.methods.checkLatestState()
 })
-test('store / reducers / receive multiple arguments', function (t) {
+test('twine / reducers / receive multiple arguments', function (t) {
   t.plan(2)
-  const app = store()({
+  const app = twine()({
     state: {},
     reducers: {
       setTitle (state, title, other) {
@@ -139,9 +139,9 @@ test('store / reducers / receive multiple arguments', function (t) {
   })
   app.methods.setTitle('foo', 123)
 })
-test('store / reducers / return from invocation', function (t) {
+test('twine / reducers / return from invocation', function (t) {
   t.plan(2)
-  const app = store()({
+  const app = twine()({
     state: {},
     reducers: {
       firstReducer (state, title) {
@@ -159,9 +159,9 @@ test('store / reducers / return from invocation', function (t) {
 })
 
 // Subscription
-test('store / subscription / called on state changes', function (t) {
+test('twine / subscription / called on state changes', function (t) {
   t.plan(1)
-  const app = store(t.pass)({
+  const app = twine(t.pass)({
     state: {},
     reducers: {
       myReducer () {
@@ -171,13 +171,13 @@ test('store / subscription / called on state changes', function (t) {
   })
   app.methods.myReducer()
 })
-test('store / subscription / receives new state and prev state', function (t) {
+test('twine / subscription / receives new state and prev state', function (t) {
   t.plan(2)
   const checkState = function (newState, oldState) {
     t.equal(oldState, 'not set', 'received previous state')
     t.equal(newState, 'set', 'received new state')
   }
-  const app = store(checkState)({
+  const app = twine(checkState)({
     state: 'not set',
     reducers: {
       myReducer () {
@@ -189,7 +189,7 @@ test('store / subscription / receives new state and prev state', function (t) {
 })
 
 // Hooks
-test('store / hooks', function (t) {
+test('twine / hooks', function (t) {
   t.plan(7)
   const hooks = {
     onMethodCall (state, prev, ...args) {
@@ -204,7 +204,7 @@ test('store / hooks', function (t) {
       t.equal(state.title, 'set', 'onStateChange hook received correct new state')
     },
   }
-  const app = store(hooks)({
+  const app = twine(hooks)({
     state: {
       title: 'not set',
     },
@@ -220,9 +220,9 @@ test('store / hooks', function (t) {
 })
 
 // Effects
-test('store / effects / receive state', function (t) {
+test('twine / effects / receive state', function (t) {
   t.plan(1)
-  const app = store()({
+  const app = twine()({
     state: {
       title: 'not set',
     },
@@ -234,9 +234,9 @@ test('store / effects / receive state', function (t) {
   })
   app.methods.setTitle()
 })
-test('store / effects / receive latest state', function (t) {
+test('twine / effects / receive latest state', function (t) {
   t.plan(1)
-  const app = store()({
+  const app = twine()({
     state: {
       title: 'not set',
     },
@@ -256,9 +256,9 @@ test('store / effects / receive latest state', function (t) {
   app.methods.updateTitle('updated title')
   app.methods.checkLatestState()
 })
-test('store / effects / receive other methods', function (t) {
+test('twine / effects / receive other methods', function (t) {
   t.plan(2)
-  const app = store()({
+  const app = twine()({
     state: {},
     reducers: {
       foo: noop,
@@ -273,9 +273,9 @@ test('store / effects / receive other methods', function (t) {
   })
   app.methods.setTitle()
 })
-test('store / effects / receive multiple arguments', function (t) {
+test('twine / effects / receive multiple arguments', function (t) {
   t.plan(3)
-  const app = store()({
+  const app = twine()({
     state: {},
     effects: {
       foo (state, methods, foo, bar, baz) {
@@ -287,9 +287,9 @@ test('store / effects / receive multiple arguments', function (t) {
   })
   app.methods.foo('foo', 'bar', 'baz')
 })
-test('store / effects / return from invocation', function (t) {
+test('twine / effects / return from invocation', function (t) {
   t.plan(1)
-  const app = store()({
+  const app = twine()({
     state: {},
     effects: {
       foo () {
@@ -299,9 +299,9 @@ test('store / effects / return from invocation', function (t) {
   })
   t.equal(typeof app.methods.foo(), 'number', 'effect returned from invocation')
 })
-test('store / effects / can be chained when using promises', function (t) {
+test('twine / effects / can be chained when using promises', function (t) {
   t.plan(1)
-  const app = store()({
+  const app = twine()({
     state: {},
     effects: {
       foo () {
@@ -315,9 +315,9 @@ test('store / effects / can be chained when using promises', function (t) {
   app.methods.foo()
     .then(() => app.methods.bar())
 })
-test('store / effects / can be chained when using callbacks', function (t) {
+test('twine / effects / can be chained when using callbacks', function (t) {
   t.plan(1)
-  const app = store()({
+  const app = twine()({
     state: {},
     effects: {
       foo (state, methods, foo, done) {
@@ -336,9 +336,9 @@ test('store / effects / can be chained when using callbacks', function (t) {
 })
 
 // Composition
-test('store / composition / composition merges state together', function (t) {
+test('twine / composition / composition merges state together', function (t) {
   t.plan(2)
-  const app = store()({
+  const app = twine()({
     state: {
       foo: 'foo',
     },
@@ -357,9 +357,9 @@ test('store / composition / composition merges state together', function (t) {
     t.fail('child state has not been merged')
   }
 })
-test('store / composition / composition works with methods', function (t) {
+test('twine / composition / composition works with methods', function (t) {
   t.plan(2)
-  const app = store()({
+  const app = twine()({
     state: {},
     reducers: {
       foo: noop,
@@ -380,9 +380,9 @@ test('store / composition / composition works with methods', function (t) {
     t.fail('child method has not been merged')
   }
 })
-test('store / composition / reducers receive state', function (t) {
+test('twine / composition / reducers receive state', function (t) {
   t.plan(4)
-  const app = store()({
+  const app = twine()({
     state: {
       foo: 'foo',
     },
@@ -411,9 +411,9 @@ test('store / composition / reducers receive state', function (t) {
   app.methods.foo()
   app.methods.bar.baz()
 })
-test('store / composition / effects receive state', function (t) {
+test('twine / composition / effects receive state', function (t) {
   t.plan(4)
-  const app = store()({
+  const app = twine()({
     state: {
       foo: 'foo',
     },
@@ -440,9 +440,9 @@ test('store / composition / effects receive state', function (t) {
   app.methods.foo()
   app.methods.bar.baz()
 })
-test('store / composition / effects receive child methods', function (t) {
+test('twine / composition / effects receive child methods', function (t) {
   t.plan(8)
-  const app = store()({
+  const app = twine()({
     state: {
       foo: 'foo',
     },
@@ -481,9 +481,9 @@ test('store / composition / effects receive child methods', function (t) {
 })
 
 // Scoping
-test('store / scoped / reducers receive local state', function (t) {
+test('twine / scoped / reducers receive local state', function (t) {
   t.plan(2)
-  const app = store()({
+  const app = twine()({
     state: {
       title: 'not set',
     },
@@ -518,9 +518,9 @@ test('store / scoped / reducers receive local state', function (t) {
   app.methods.counter.increment()
   app.methods.counter.anotherModel.update()
 })
-test('store / scoped / effects receive local state and methods', function (t) {
+test('twine / scoped / effects receive local state and methods', function (t) {
   t.plan(4)
-  const app = store()({
+  const app = twine()({
     state: {
       title: 'not set',
     },
@@ -563,7 +563,7 @@ test('store / scoped / effects receive local state and methods', function (t) {
   app.methods.counter.increment()
   app.methods.counter.anotherModel.update()
 })
-test('store / scoped / reducers update local state effecting global state', function (t) {
+test('twine / scoped / reducers update local state effecting global state', function (t) {
   t.plan(8)
   function subscribeOne (state) {
     t.equal(state.title, 'not set', 'title remains unchanged')
@@ -571,7 +571,7 @@ test('store / scoped / reducers update local state effecting global state', func
     t.equal(state.foo.bar, 'baz', 'foo bar remains unchanged')
     t.equal(state.counter.anotherModel.myState, 'updated', 'state updated')
   }
-  const appOne = store(subscribeOne)({
+  const appOne = twine(subscribeOne)({
     state: {
       title: 'not set',
     },
@@ -615,7 +615,7 @@ test('store / scoped / reducers update local state effecting global state', func
     t.equal(state.foo.bar, 'baz', 'foo bar remains unchanged')
     t.equal(state.counter.anotherModel.myState, 'hey', 'state remains unchanged')
   }
-  const appTwo = store(subscribeTwo)({
+  const appTwo = twine(subscribeTwo)({
     state: {
       title: 'not set'
     },
@@ -652,8 +652,8 @@ test('store / scoped / reducers update local state effecting global state', func
   })
   appTwo.methods.counter.increment()
 })
-test.skip('skip / store / scoped / effects receive local methods that update global state', function (t) {
+test.skip('skip / twine / scoped / effects receive local methods that update global state', function (t) {
 
 })
-test.skip('skip / store / scoped / hooks still work as expected with global state', function (t) {
+test.skip('skip / twine / scoped / hooks still work as expected with global state', function (t) {
 })
