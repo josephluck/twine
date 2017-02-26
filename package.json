@@ -1,6 +1,6 @@
 {
   "name": "twine-js",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "Functional front-end state management",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -8,7 +8,8 @@
     "test": "ts-node node_modules/.bin/tape ./test/index.spec.ts | tap-spec",
     "dist": "tsc && npm run browserify && npm run minify",
     "browserify": "browserify -g babelify -g uglifyify dist/index.js -o dist/bundle.js",
-    "minify": "uglifyjs ./dist/bundle.js --compress --mangle -o ./dist/bundle.min.js"
+    "minify": "uglifyjs ./dist/bundle.js --compress --mangle -o ./dist/bundle.min.js",
+    "deploy": "npm run dist && npm run publish"
   },
   "author": "Joseph Luck",
   "license": "ISC",
