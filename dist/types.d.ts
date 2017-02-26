@@ -1,4 +1,4 @@
-export declare namespace Tansu {
+declare namespace Twine {
     type Reducer = (state, ...args: any[]) => any;
     interface Reducers {
         [key: string]: Reducer;
@@ -17,7 +17,7 @@ export declare namespace Tansu {
     interface Models {
         [key: string]: Model;
     }
-    type Subscription = (state, prev, methods) => any;
+    type Subscription = (state, prev, methods: Methods) => any;
     interface ConfigurationOpts {
         onStateChange: Subscription;
         onMethodCall: any;
@@ -33,3 +33,4 @@ export declare namespace Tansu {
     }
     type ReturnOutput = (model: Model) => Output;
 }
+export default Twine;
