@@ -69,7 +69,7 @@ function twine(opts) {
                     _a[key] = function () {
                         if (path.length) {
                             var nestedModel = retrieveNestedModel(model, path);
-                            var effectState = nestedModel.scoped ? nestedModel.state : state;
+                            var effectState = nestedModel.scoped ? dotProp.get(state, path.join('.')) : state;
                             var effectActions = nestedModel.scoped ? dotProp.get(actions, path.join('.')) : actions;
                             return effects[key].apply(null, [effectState, effectActions].concat(Array.prototype.slice.call(arguments)));
                         }
