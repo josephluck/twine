@@ -3,7 +3,7 @@ export declare namespace Twine {
     interface Reducers {
         [key: string]: Reducer;
     }
-    type Effect = (state, methods, ...args: any[]) => any;
+    type Effect = (state, actions, ...args: any[]) => any;
     interface Effects {
         [key: string]: Effect;
     }
@@ -17,19 +17,19 @@ export declare namespace Twine {
     interface Models {
         [key: string]: Model;
     }
-    type Subscription = (state, prev, methods: Methods) => any;
+    type Subscription = (state, prev, actions: Actions) => any;
     interface ConfigurationOpts {
         onStateChange: Subscription;
         onMethodCall: any;
     }
     type Configuration = Subscription | ConfigurationOpts;
-    interface Methods {
-        [key: string]: Reducer | Effect | Methods;
+    interface Actions {
+        [key: string]: Reducer | Effect | Actions;
     }
     type State = any;
     interface Output {
         state: any;
-        methods: any;
+        actions: any;
     }
     type ReturnOutput = (model: Model) => Output;
 }

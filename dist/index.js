@@ -41,8 +41,8 @@ function twine(opts) {
     var onMethodCall = typeof opts === 'function' ? noop : opts.onMethodCall || noop;
     return function output(model) {
         var state = createState(model);
-        var methods = createMethods(model, []);
-        function decorateMethods(reducers, effects, path) {
+        var actions = createActions(model, []);
+        function decorateActions(reducers, effects, path) {
             var decoratedReducers = Object.keys(reducers || {}).map(function (key) {
                 return _a = {},
                     _a[key] = function () {
@@ -56,7 +56,7 @@ function twine(opts) {
                         else {
                             newState = reducers[key].apply(null, [state].concat(Array.prototype.slice.call(arguments)));
                         }
-                        onStateChange(newState, state, methods);
+                        onStateChange(newState, state, actions);
                         onMethodCall.apply(null, [newState, state].concat(Array.prototype.slice.call(arguments)));
                         state = newState;
                         return newState;
@@ -70,31 +70,31 @@ function twine(opts) {
                         if (path.length) {
                             var nestedModel = retrieveNestedModel(model, path);
                             var effectState = nestedModel.scoped ? nestedModel.state : state;
-                            var effectMethods = nestedModel.scoped ? dotProp.get(methods, path.join('.')) : methods;
-                            return effects[key].apply(null, [effectState, effectMethods].concat(Array.prototype.slice.call(arguments)));
+                            var effectActions = nestedModel.scoped ? dotProp.get(actions, path.join('.')) : actions;
+                            return effects[key].apply(null, [effectState, effectActions].concat(Array.prototype.slice.call(arguments)));
                         }
-                        return effects[key].apply(null, [state, methods].concat(Array.prototype.slice.call(arguments)));
+                        return effects[key].apply(null, [state, actions].concat(Array.prototype.slice.call(arguments)));
                     },
                     _a;
                 var _a;
             });
             return decoratedReducers.concat(decoratedEffects).reduce(arrayToObj, {});
         }
-        function createMethods(model, path) {
+        function createActions(model, path) {
             if (model.models) {
                 var child = Object.keys(model.models).map(function (key) {
                     return _a = {},
-                        _a[key] = createMethods(model.models[key], (path).concat(key)),
+                        _a[key] = createActions(model.models[key], (path).concat(key)),
                         _a;
                     var _a;
                 }).reduce(arrayToObj, {});
-                return Object.assign({}, decorateMethods(model.reducers, model.effects, path), child);
+                return Object.assign({}, decorateActions(model.reducers, model.effects, path), child);
             }
-            return decorateMethods(model.reducers, model.effects, path);
+            return decorateActions(model.reducers, model.effects, path);
         }
         return {
             state: state,
-            methods: methods,
+            actions: actions,
         };
     };
 }
