@@ -1,4 +1,4 @@
-namespace Twine {
+export namespace Twine {
   export type Reducer = (state, ...args: any[]) => any
   export interface Reducers {
     [key: string]: Reducer
@@ -33,5 +33,3 @@ namespace Twine {
   }
   export type ReturnOutput = (model: Model) => Output
 }
-
-export default Twine

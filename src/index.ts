@@ -1,5 +1,5 @@
 import * as dotProp from 'dot-prop'
-import Twine from './types'
+import { Twine } from './types'
 
 function noop () {
   return null

@@ -1,4 +1,4 @@
-declare namespace Twine {
+export declare namespace Twine {
     type Reducer = (state, ...args: any[]) => any;
     interface Reducers {
         [key: string]: Reducer;
@@ -33,4 +33,3 @@ declare namespace Twine {
     }
     type ReturnOutput = (model: Model) => Output;
 }
-export default Twine;
