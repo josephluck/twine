@@ -18,12 +18,11 @@ test('twine / utils / gets nested state given array of keys', function (t) {
     baz: 'baz updated',
   }
   let newState = updateStateAtPath(state, ['bar', 'baz'], newBazState)
-  console.log(newState)
   t.equal(newState.bar.baz, newBazState)
 })
 
-// Readme examples
-test('twine / readme / example 1', function (t) {
+// app examples
+test('twine / app / example 1', function (t) {
   t.plan(3)
   const subscription = function (state) {
     t.equal(state.title, 'bar')
@@ -52,7 +51,7 @@ test('twine / readme / example 1', function (t) {
   app.actions.update('bar')
   app.actions.async(1)
 })
-test('twine / readme / example 2', function (t) {
+test('twine / app / example 2', function (t) {
   t.plan(6)
   const app = twine()({
     state: {
@@ -95,6 +94,59 @@ test('twine / readme / example 2', function (t) {
   t.equal(app.state.levelTwo.foo, 'bar', 'level two state is correct')
   t.equal(app.state.levelTwo.levelThree.foo, 'baz', 'level three state is correct')
 })
+test('twine / app / example 3', function (t) {
+  t.plan(6)
+  const model = {
+    state: {},
+    models: {
+      alert: {
+        state: {},
+      },
+      user: {
+        state: {},
+      },
+      pages: {
+        state: {},
+        models: {
+          login: {
+            scoped: true,
+            state: {
+              username: 'joseph@example.com',
+              password: 'password',
+            },
+            reducers: {
+              setFormField (state, key, value) {
+                return {
+                  ...state,
+                  [key]: value,
+                }
+              },
+            },
+            effects: {
+              updateFormField (state, actions, key, value) {
+                return actions.setFormField(key, value)
+              },
+            },
+          },
+        },
+      },
+    },
+  }
+  let _state
+  const app = twine((state) => {
+    _state = state
+  })(model)
+
+  app.actions.pages.login.setFormField('username', 'joseph@example.comm')
+  t.equal(_state.pages.login.username, 'joseph@example.comm')
+  t.equal(_state.pages.login.password, 'password')
+  app.actions.pages.login.updateFormField('username', 'joseph@example.commm')
+  t.equal(_state.pages.login.username, 'joseph@example.commm')
+  t.equal(_state.pages.login.password, 'password')
+  app.actions.pages.login.setFormField('username', 'chloe@example.co.uk')
+  t.equal(_state.pages.login.username, 'chloe@example.co.uk')
+  t.equal(_state.pages.login.password, 'password')
+})
 
 // Return of twine setup
 test('twine / return / actions contain reducers', function (t) {
@@ -126,7 +178,7 @@ test('twine / reducers / receive state', function (t) {
   app.actions.setTitle()
 })
 test('twine / reducers / receive latest state', function (t) {
-  t.plan(1)
+  t.plan(2)
   const app = twine()({
     state: {
       title: 'not set',
@@ -134,16 +186,37 @@ test('twine / reducers / receive latest state', function (t) {
     reducers: {
       updateTitle (state, title) {
         return {
-          title: title,
+          title,
         }
       },
       checkLatestState (state) {
         t.equal(state.title, 'updated title', 'reducer received latest state')
+        return state
+      },
+    },
+    models: {
+      nested: {
+        state: {
+          foo: 'not set',
+        },
+        reducers: {
+          updateFoo (state, foo) {
+            return {
+              foo,
+            }
+          },
+          checkLatestState (state) {
+            t.equal(state.foo, 'updated foo', 'nested reducer received latest state')
+            return state
+          },
+        },
       },
     },
   })
   app.actions.updateTitle('updated title')
   app.actions.checkLatestState()
+  app.actions.nested.updateFoo('updated foo')
+  app.actions.nested.checkLatestState()
 })
 test('twine / reducers / receive multiple arguments', function (t) {
   t.plan(2)
@@ -175,6 +248,51 @@ test('twine / reducers / return from invocation', function (t) {
   t.equal(firstReducerReturn.title, 'bar', 'first reducer returned correctly')
   const secondReducerReturn = app.actions.secondReducer()
   t.equal(typeof secondReducerReturn.title, 'number', 'second reducer returned correctly')
+})
+test('twine / reducers / update state', function (t) {
+  t.plan(12)
+  let state
+  const app = twine((_state) => state = _state)({
+    state: {
+      title: 'not set',
+      foo: 'untouched',
+    },
+    reducers: {
+      firstReducer (state, title) {
+        return {title}
+      },
+    },
+    models: {
+      nested: {
+        state: {
+          title: 'not set',
+        },
+        reducers: {
+          secondReducer (state, title) {
+            return {
+              title,
+            }
+          },
+        },
+      },
+    },
+  })
+  app.actions.firstReducer('bar')
+  t.equal(state.title, 'bar', 'title updated for the first time')
+  t.equal(state.foo, 'untouched', 'foo left untouched')
+  t.equal(state.nested.title, 'not set', 'nested state left untouched')
+  app.actions.firstReducer('baz')
+  t.equal(state.title, 'baz', 'title updated for the second time')
+  t.equal(state.foo, 'untouched', 'foo left untouched')
+  t.equal(state.nested.title, 'not set', 'nested state left untouched')
+  app.actions.nested.secondReducer('update me')
+  t.equal(state.title, 'baz', 'title left untouched')
+  t.equal(state.foo, 'untouched', 'foo left untouched')
+  t.equal(state.nested.title, 'update me', 'nested state updated')
+  app.actions.nested.secondReducer('update meeeeee')
+  t.equal(state.title, 'baz', 'title left untouched')
+  t.equal(state.foo, 'untouched', 'foo left untouched')
+  t.equal(state.nested.title, 'update meeeeee', 'nested state updated')
 })
 
 // Subscription

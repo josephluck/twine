@@ -47,7 +47,7 @@ export function updateStateAtPath (obj, path, value) {
   let arr
   let key
   if (Array.isArray(path) && path.length > 0) {
-    arr = path
+    arr = path.slice()
     key = arr[0]
     if (arr.length > 1) {
       arr.shift()
@@ -111,7 +111,7 @@ export default function twine (opts?: Twine.Configuration): Twine.ReturnOutput {
       if (model.models) {
         const child = Object.keys(model.models).map(key => {
           return {
-            [key]: createActions(model.models[key], (path).concat(key)),
+            [key]: createActions(model.models[key], path.concat(key)),
           }
         }).reduce(arrayToObj, {})
         return Object.assign({}, decorateActions(model.reducers, model.effects, path), child)

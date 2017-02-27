@@ -43,7 +43,7 @@ function updateStateAtPath(obj, path, value) {
     var arr;
     var key;
     if (Array.isArray(path) && path.length > 0) {
-        arr = path;
+        arr = path.slice();
         key = arr[0];
         if (arr.length > 1) {
             arr.shift();
@@ -108,7 +108,7 @@ function twine(opts) {
             if (model.models) {
                 var child = Object.keys(model.models).map(function (key) {
                     return _a = {},
-                        _a[key] = createActions(model.models[key], (path).concat(key)),
+                        _a[key] = createActions(model.models[key], path.concat(key)),
                         _a;
                     var _a;
                 }).reduce(arrayToObj, {});
