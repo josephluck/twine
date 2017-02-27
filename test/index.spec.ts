@@ -262,6 +262,60 @@ test('twine / effects / receive latest state', function (t) {
   app.actions.updateTitle('updated title')
   app.actions.checkLatestState()
 })
+test('twine / effects / unscoped effects receive global state', function (t) {
+  t.plan(1)
+  const app = twine()({
+    state: {
+      title: 'not set',
+    },
+    reducers: {
+      updateTitle (state, title) {
+        return {
+          title: title,
+        }
+      },
+    },
+    models: {
+      unscopedModel: {
+        state: {},
+        effects: {
+          checkLatestState (state) {
+            t.equal(state.title, 'updated title', 'effect received global state')
+          },
+        },
+      },
+    },
+  })
+  app.actions.updateTitle('updated title')
+  app.actions.unscopedModel.checkLatestState()
+})
+test('twine / effects / unscoped effects receive global actions', function (t) {
+  t.plan(2)
+  const app = twine()({
+    state: {
+      title: 'not set',
+    },
+    reducers: {
+      updateTitle (state, title) {
+        return {
+          title: title,
+        }
+      },
+    },
+    models: {
+      unscopedModel: {
+        state: {},
+        effects: {
+          checkLatestState (state, actions) {
+            t.equal(typeof actions.updateTitle, 'function', 'effect received global action')
+            t.equal(typeof actions.unscopedModel.checkLatestState, 'function', 'effect received nested global action')
+          },
+        },
+      },
+    },
+  })
+  app.actions.unscopedModel.checkLatestState()
+})
 test('twine / effects / receive other actions', function (t) {
   t.plan(2)
   const app = twine()({
@@ -674,7 +728,7 @@ test('twine / scoped / effects receive latest local state', function (t) {
         },
         effects: {
           checkLatestState (state) {
-            t.equal(state.title, 'updated title', 'reducer received state')
+            t.equal(state.title, 'updated title', 'effect received local state')
           },
         },
       },
@@ -683,8 +737,5 @@ test('twine / scoped / effects receive latest local state', function (t) {
   app.actions.scopedModel.updateTitle('updated title')
   app.actions.scopedModel.checkLatestState()
 })
-test.skip('skip / twine / scoped / effects receive local actions that update global state', function (t) {
-
-})
-test.skip('skip / twine / scoped / hooks still work as expected with global state', function (t) {
-})
+test.skip('skip / twine / scoped / effects receive local actions that update global state', function (t) {})
+test.skip('skip / twine / scoped / hooks still work as expected with global state', function (t) {})
