@@ -1,4 +1,3 @@
-import * as dotProp from 'dot-prop'
 import { Twine } from './types'
 
 function noop () {
@@ -37,6 +36,29 @@ function retrieveNestedModel (model: Twine.Model, path: string[], index: number 
   return model
 }
 
+export function getNestedObjFromPath (state, path: any[]) {
+  if (path.length) {
+    return getNestedObjFromPath(state[path[0]], path.slice(1))
+  }
+  return state
+}
+
+export function updateStateAtPath (obj, path, value) {
+  let arr
+  let key
+  if (Array.isArray(path) && path.length > 0) {
+    arr = path
+    key = arr[0]
+    if (arr.length > 1) {
+      arr.shift()
+      obj[key] = updateStateAtPath(obj[key], arr, value)
+    } else {
+      obj[key] = value
+    }
+  }
+  return obj
+}
+
 export default function twine (opts?: Twine.Configuration): Twine.ReturnOutput {
   if (!opts) {
     opts = noop
@@ -53,12 +75,12 @@ export default function twine (opts?: Twine.Configuration): Twine.ReturnOutput {
         return {
           [key]: function () {
             let oldState = Object.assign({}, state)
-            let localState = path.length ? dotProp.get(state, path.join('.')) : state
+            let localState = path.length ? getNestedObjFromPath(state, path) : state
             let reducerArgs = [localState].concat(Array.prototype.slice.call(arguments))
             let reducerResponse = reducers[key].apply(null, reducerArgs)
             let newLocalState = Object.assign({}, localState, reducerResponse)
             if (path.length) {
-              dotProp.set(state, path.join('.'), newLocalState)
+              state = path.length ? updateStateAtPath(state, path, newLocalState) : newLocalState
             } else {
               state = newLocalState
             }
@@ -74,8 +96,8 @@ export default function twine (opts?: Twine.Configuration): Twine.ReturnOutput {
           [key]: function () {
             if (path.length) {
               let nestedModel = retrieveNestedModel(model, path)
-              let effectState = nestedModel.scoped ? dotProp.get(state, path.join('.')) : state
-              let effectActions = nestedModel.scoped ? dotProp.get(actions, path.join('.')) : actions
+              let effectState = nestedModel.scoped ? getNestedObjFromPath(state, path) : state
+              let effectActions = nestedModel.scoped ? getNestedObjFromPath(actions, path) : actions
               return effects[key].apply(null, [effectState, effectActions].concat(Array.prototype.slice.call(arguments)))
             }
             return effects[key].apply(null, [state, actions].concat(Array.prototype.slice.call(arguments)))

@@ -1,6 +1,5 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var dotProp = require("dot-prop");
 function noop() {
     return null;
 }
@@ -33,6 +32,30 @@ function retrieveNestedModel(model, path, index) {
     }
     return model;
 }
+function getNestedObjFromPath(state, path) {
+    if (path.length) {
+        return getNestedObjFromPath(state[path[0]], path.slice(1));
+    }
+    return state;
+}
+exports.getNestedObjFromPath = getNestedObjFromPath;
+function updateStateAtPath(obj, path, value) {
+    var arr;
+    var key;
+    if (Array.isArray(path) && path.length > 0) {
+        arr = path;
+        key = arr[0];
+        if (arr.length > 1) {
+            arr.shift();
+            obj[key] = updateStateAtPath(obj[key], arr, value);
+        }
+        else {
+            obj[key] = value;
+        }
+    }
+    return obj;
+}
+exports.updateStateAtPath = updateStateAtPath;
 function twine(opts) {
     if (!opts) {
         opts = noop;
@@ -46,20 +69,21 @@ function twine(opts) {
             var decoratedReducers = Object.keys(reducers || {}).map(function (key) {
                 return _a = {},
                     _a[key] = function () {
-                        var newState;
+                        var oldState = Object.assign({}, state);
+                        var localState = path.length ? getNestedObjFromPath(state, path) : state;
+                        var reducerArgs = [localState].concat(Array.prototype.slice.call(arguments));
+                        var reducerResponse = reducers[key].apply(null, reducerArgs);
+                        var newLocalState = Object.assign({}, localState, reducerResponse);
                         if (path.length) {
-                            var localState = retrieveNestedModel(model, path).scoped ? dotProp.get(state, path.join('.')) : state;
-                            var newLocalState = Object.assign({}, localState, reducers[key].apply(null, [localState].concat(Array.prototype.slice.call(arguments))));
-                            dotProp.set(state, path.join('.'), newLocalState);
-                            newState = state;
+                            state = path.length ? updateStateAtPath(state, path, newLocalState) : newLocalState;
                         }
                         else {
-                            newState = reducers[key].apply(null, [state].concat(Array.prototype.slice.call(arguments)));
+                            state = newLocalState;
                         }
-                        onStateChange(newState, state, actions);
-                        onMethodCall.apply(null, [newState, state].concat(Array.prototype.slice.call(arguments)));
-                        state = newState;
-                        return newState;
+                        var onMethodCallArgs = [state, oldState].concat(Array.prototype.slice.call(arguments));
+                        onMethodCall.apply(null, onMethodCallArgs);
+                        onStateChange(state, oldState, actions);
+                        return newLocalState;
                     },
                     _a;
                 var _a;
@@ -69,8 +93,8 @@ function twine(opts) {
                     _a[key] = function () {
                         if (path.length) {
                             var nestedModel = retrieveNestedModel(model, path);
-                            var effectState = nestedModel.scoped ? dotProp.get(state, path.join('.')) : state;
-                            var effectActions = nestedModel.scoped ? dotProp.get(actions, path.join('.')) : actions;
+                            var effectState = nestedModel.scoped ? getNestedObjFromPath(state, path) : state;
+                            var effectActions = nestedModel.scoped ? getNestedObjFromPath(actions, path) : actions;
                             return effects[key].apply(null, [effectState, effectActions].concat(Array.prototype.slice.call(arguments)));
                         }
                         return effects[key].apply(null, [state, actions].concat(Array.prototype.slice.call(arguments)));
