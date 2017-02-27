@@ -52,19 +52,20 @@ export default function twine (opts?: Twine.Configuration): Twine.ReturnOutput {
       const decoratedReducers = Object.keys(reducers || {}).map(key => {
         return {
           [key]: function () {
-            let newState
+            let oldState = Object.assign({}, state)
+            let localState = path.length ? dotProp.get(state, path.join('.')) : state
+            let reducerArgs = [localState].concat(Array.prototype.slice.call(arguments))
+            let reducerResponse = reducers[key].apply(null, reducerArgs)
+            let newLocalState = Object.assign({}, localState, reducerResponse)
             if (path.length) {
-              let localState = retrieveNestedModel(model, path).scoped ? dotProp.get(state, path.join('.')) : state
-              let newLocalState = Object.assign({}, localState, reducers[key].apply(null, [localState].concat(Array.prototype.slice.call(arguments))))
               dotProp.set(state, path.join('.'), newLocalState)
-              newState = state
             } else {
-              newState = reducers[key].apply(null, [state].concat(Array.prototype.slice.call(arguments)))
+              state = newLocalState
             }
-            onStateChange(newState, state, actions)
-            onMethodCall.apply(null, [newState, state].concat(Array.prototype.slice.call(arguments)))
-            state = newState
-            return newState
+            let onMethodCallArgs = [state, oldState].concat(Array.prototype.slice.call(arguments))
+            onMethodCall.apply(null, onMethodCallArgs)
+            onStateChange(state, oldState, actions)
+            return newLocalState
           },
         }
       })

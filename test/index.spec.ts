@@ -145,43 +145,49 @@ test('twine / reducers / return from invocation', function (t) {
     state: {},
     reducers: {
       firstReducer (state, title) {
-        return title
+        return {title}
       },
       secondReducer () {
-        return 123
+        return {title: 123}
       },
     },
   })
   const firstReducerReturn = app.actions.firstReducer('bar')
-  t.equal(firstReducerReturn, 'bar', 'first reducer returned correctly')
+  t.equal(firstReducerReturn.title, 'bar', 'first reducer returned correctly')
   const secondReducerReturn = app.actions.secondReducer()
-  t.equal(typeof secondReducerReturn, 'number', 'second reducer returned correctly')
+  t.equal(typeof secondReducerReturn.title, 'number', 'second reducer returned correctly')
 })
 
 // Subscription
 test('twine / subscription / called on state changes', function (t) {
   t.plan(1)
-  const app = twine(t.pass)({
+  const app = twine(() => t.pass('subscription called'))({
     state: {},
     reducers: {
       myReducer () {
-        return 'subscription called'
+        return {
+          success: 'subscription called',
+        }
       },
     },
   })
   app.actions.myReducer()
 })
-test('twine / subscription / receives new state and prev state', function (t) {
+test('twine / subscription / receives new and old state', function (t) {
   t.plan(2)
   const checkState = function (newState, oldState) {
-    t.equal(oldState, 'not set', 'received previous state')
-    t.equal(newState, 'set', 'received new state')
+    t.equal(oldState.title, 'not set', 'received previous state')
+    t.equal(newState.title, 'set', 'received new state')
   }
   const app = twine(checkState)({
-    state: 'not set',
+    state: {
+      title: 'not set',
+    },
     reducers: {
       myReducer () {
-        return 'set'
+        return {
+          title: 'set',
+        }
       },
     },
   })
@@ -321,7 +327,6 @@ test('twine / effects / can be chained when using callbacks', function (t) {
     state: {},
     effects: {
       foo (state, actions, foo, done) {
-        console.log(foo, done)
         done(foo)
         return foo
       },
@@ -381,7 +386,7 @@ test('twine / composition / composition works with actions', function (t) {
   }
 })
 test('twine / composition / reducers receive state', function (t) {
-  t.plan(4)
+  t.plan(2)
   const app = twine()({
     state: {
       foo: 'foo',
@@ -389,7 +394,6 @@ test('twine / composition / reducers receive state', function (t) {
     reducers: {
       foo (state) {
         t.equal(state.foo, 'foo', 'parent reducer received state')
-        t.equal(state.bar.baz, 'baz', 'parent reducer can access child state')
         return state
       },
     },
@@ -400,8 +404,7 @@ test('twine / composition / reducers receive state', function (t) {
         },
         reducers: {
           baz (state) {
-            t.equal(state.bar.baz, 'baz', 'child reducer received state')
-            t.equal(state.foo, 'foo', 'child reducer cannot access parent state')
+            t.equal(state.baz, 'baz', 'child reducer received state')
             return state
           },
         },
