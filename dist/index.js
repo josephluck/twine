@@ -38,7 +38,6 @@ function getNestedObjFromPath(state, path) {
     }
     return state;
 }
-exports.getNestedObjFromPath = getNestedObjFromPath;
 function updateStateAtPath(obj, path, value) {
     var arr;
     var key;
@@ -55,7 +54,6 @@ function updateStateAtPath(obj, path, value) {
     }
     return obj;
 }
-exports.updateStateAtPath = updateStateAtPath;
 function twine(opts) {
     if (!opts) {
         opts = noop;

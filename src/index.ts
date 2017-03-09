@@ -1,4 +1,36 @@
-import { Twine } from './types'
+export type Reducer = (state, ...args: any[]) => any
+export interface Reducers {
+  [key: string]: Reducer
+}
+export type Effect = (state, actions, ...args: any[]) => any
+export interface Effects {
+  [key: string]: Effect
+}
+export interface Model {
+  scoped?: boolean
+  state: any
+  reducers?: Reducers
+  effects?: Effects
+  models?: Models
+}
+export interface Models {
+  [key: string]: Model
+}
+export type Subscription = (state, prev, actions: Actions) => any
+export interface ConfigurationOpts {
+  onStateChange: Subscription
+  onMethodCall: any
+}
+export type Configuration = Subscription | ConfigurationOpts
+export interface Actions {
+  [key: string]: Reducer | Effect | Actions
+}
+export type State = any
+export interface Output {
+  state: any
+  actions: any
+}
+export type ReturnOutput = (model: Model) => Output
 
 function noop () {
   return null
@@ -8,24 +40,22 @@ function arrayToObj (curr, prev) {
   return Object.assign({}, curr, prev)
 }
 
-function merge (model: Twine.Model, prop: string) {
+export function merge (model: Model, prop: string) {
   if (model.models) {
-    let child = Object.keys(model.models).map(key => {
-      return {
-        [key]: merge(model.models[key], prop),
-      }
-    }).reduce(arrayToObj, {})
+    let child = Object.keys(model.models).map(key => ({
+      [key]: merge(model.models[key], prop),
+    })).reduce(arrayToObj, {})
 
     return Object.assign({}, model[prop], child)
   }
   return model[prop]
 }
 
-function createState (model: Twine.Model): Twine.State {
+export function createState (model: Model): State {
   return merge(model, 'state')
 }
 
-function retrieveNestedModel (model: Twine.Model, path: string[], index: number = 0): Twine.Model {
+export function retrieveNestedModel (model: Model, path: string[], index: number = 0): Model {
   if (model.models) {
     let currModel = model.models[path[index]]
     if (currModel && currModel.models && currModel.models[path[index + 1]]) {
@@ -59,18 +89,18 @@ export function updateStateAtPath (obj, path, value) {
   return obj
 }
 
-export default function twine (opts?: Twine.Configuration): Twine.ReturnOutput {
+export default function twine (opts?: Configuration): ReturnOutput {
   if (!opts) {
     opts = noop
   }
   let onStateChange = typeof opts === 'function' ? opts : opts.onStateChange || noop
   let onMethodCall = typeof opts === 'function' ? noop : opts.onMethodCall || noop
 
-  return function output (model: Twine.Model): Twine.Output {
+  return function output (model: Model): Output {
     let state = createState(model)
     let actions = createActions(model, [])
 
-    function decorateActions (reducers: Twine.Reducers, effects: Twine.Effects, path: string[]): Twine.Actions {
+    function decorateActions (reducers: Reducers, effects: Effects, path: string[]): Actions {
       const decoratedReducers = Object.keys(reducers || {}).map(key => {
         return {
           [key]: function () {
@@ -79,11 +109,7 @@ export default function twine (opts?: Twine.Configuration): Twine.ReturnOutput {
             let reducerArgs = [localState].concat(Array.prototype.slice.call(arguments))
             let reducerResponse = reducers[key].apply(null, reducerArgs)
             let newLocalState = Object.assign({}, localState, reducerResponse)
-            if (path.length) {
-              state = path.length ? updateStateAtPath(state, path, newLocalState) : newLocalState
-            } else {
-              state = newLocalState
-            }
+            state = path.length ? updateStateAtPath(state, path, newLocalState) : newLocalState
             let onMethodCallArgs = [state, oldState].concat(Array.prototype.slice.call(arguments))
             onMethodCall.apply(null, onMethodCallArgs)
             onStateChange(state, oldState, actions)
@@ -107,7 +133,7 @@ export default function twine (opts?: Twine.Configuration): Twine.ReturnOutput {
       return decoratedReducers.concat(decoratedEffects).reduce(arrayToObj, {})
     }
 
-    function createActions (model: Twine.Model, path: string[]): Twine.Actions {
+    function createActions (model: Model, path: string[]): Actions {
       if (model.models) {
         const child = Object.keys(model.models).map(key => {
           return {
