@@ -1,5 +1,7 @@
 # Functional front-end UI state management
 
+[![Greenkeeper badge](https://badges.greenkeeper.io/josephluck/twine.svg)](https://greenkeeper.io/)
+
 Warning: this isn't a finished library! Use with caution.
 
 ## For:
