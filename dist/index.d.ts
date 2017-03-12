@@ -31,4 +31,9 @@ export interface Output {
     actions: any;
 }
 export declare type ReturnOutput = (model: Model) => Output;
+export declare function merge(model: Model, prop: string): any;
+export declare function createState(model: Model): State;
+export declare function retrieveNestedModel(model: Model, path: string[], index?: number): Model;
+export declare function getNestedObjFromPath(state: any, path: any[]): any;
+export declare function updateStateAtPath(obj: any, path: any, value: any): any;
 export default function twine(opts?: Configuration): ReturnOutput;

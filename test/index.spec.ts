@@ -1,4 +1,3 @@
-require('es6-shim')
 import * as test from 'tape'
 import twine, {getNestedObjFromPath, updateStateAtPath} from '../src/index'
 const noop = () => null

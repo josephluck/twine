@@ -10,30 +10,27 @@
   "types": "./dist/index.d.ts",
   "scripts": {
     "test": "ts-node node_modules/.bin/tape ./test/index.spec.ts | tap-spec",
-    "dist": "tsc && npm run browserify",
-    "browserify": "browserify -g babelify -g uglifyify dist/index.js -o dist/bundle.min.js",
+    "dist": "tsc && npm run browserify && npm run minify",
+    "browserify": "browserify -g babelify dist/index.js -o dist/bundle.js",
+    "minify": "uglifyjs dist/bundle.js -c -m -o dist/bundle.min.js",
     "deploy": "npm run dist && npm publish"
   },
   "author": "Joseph Luck",
   "license": "ISC",
   "devDependencies": {
+    "babel-cli": "^6.23.0",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-stage-0": "^6.22.0",
     "babelify": "^7.3.0",
     "browserify": "^14.1.0",
-    "es6-shim": "^0.35.3",
+    "tap-spec": "^4.1.1",
+    "tape": "^4.6.3",
     "ts-node": "^2.1.0",
     "tsify": "^3.0.1",
     "tslint": "^4.4.2",
     "tslint-config-standard": "^4.0.0",
     "typescript": "^2.2.1",
     "uglifyify": "^3.0.4",
-    "uglifyjs": "^2.4.10",
-    "@types/es6-shim": "^0.31.32",
-    "@types/node": "^7.0.5",
-    "babel-cli": "^6.23.0",
-    "babel-preset-es2015": "^6.22.0",
-    "babel-preset-stage-0": "^6.22.0",
-    "budo": "^9.4.7",
-    "tap-spec": "^4.1.1",
-    "tape": "^4.6.3"
+    "uglifyjs": "^2.4.10"
   }
 }
