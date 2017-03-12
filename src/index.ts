@@ -1,3 +1,28 @@
+export type Subscriber = (state: State, prev: State, actions: any) => any
+export type OnMethodCall = (state: State, prev: State, ...args) => any
+
+export type Opts = Subscriber | {
+  onStateChange: Subscriber,
+  onMethodCall: OnMethodCall,
+}
+
+export interface Model {
+  state?: any
+  reducers?: {
+    [key: string]: (state: any, ...args) => any,
+  }
+  effects?: {
+    [key: string]: (state: any, actions: any, ...args) => any,
+  }
+  models?: {
+    [key: string]: Model,
+  }
+}
+
+export interface State {
+  [key: string]: State
+}
+
 function noop () {
   return null
 }
@@ -6,7 +31,7 @@ function arrayToObj (curr, prev) {
   return Object.assign({}, curr, prev)
 }
 
-export function merge (model, prop) {
+export function merge (model: Model, prop: string) {
   if (model.models) {
     let child = Object.keys(model.models).map(key => ({
       [key]: merge(model.models[key], prop),
@@ -17,11 +42,11 @@ export function merge (model, prop) {
   return model[prop]
 }
 
-export function createState (model) {
+export function createState (model: Model) {
   return merge(model, 'state')
 }
 
-export function retrieveNestedModel (model, path, index = 0) {
+export function retrieveNestedModel (model: Model, path: string[], index: number = 0) {
   if (model.models) {
     let currModel = model.models[path[index]]
     if (currModel && currModel.models && currModel.models[path[index + 1]]) {
@@ -32,37 +57,37 @@ export function retrieveNestedModel (model, path, index = 0) {
   return model
 }
 
-export function getNestedObjFromPath (state, path) {
+export function getNestedObjFromPath (state: State, path: string[]) {
   if (path.length) {
     return getNestedObjFromPath(state[path[0]], path.slice(1))
   }
   return state
 }
 
-export function updateStateAtPath (obj, path, value) {
+export function updateStateAtPath (state: State, path: string[], value: any) {
   if (path.length > 0) {
     let key = path[0]
     if (path.length > 1) {
-      obj[key] = updateStateAtPath(obj[key], path.slice(1), value)
+      state[key] = updateStateAtPath(state[key], path.slice(1), value)
     } else {
-      obj[key] = value
+      state[key] = value
     }
   }
-  return obj
+  return state
 }
 
-export default function twine (opts) {
+export default function twine (opts: Opts) {
   if (!opts) {
     opts = noop
   }
   let onStateChange = typeof opts === 'function' ? opts : opts.onStateChange || noop
   let onMethodCall = typeof opts === 'function' ? noop : opts.onMethodCall || noop
 
-  return function output (model) {
+  return function output (model: Model) {
     let state = createState(model)
     let actions = createActions(model, [])
 
-    function decorateActions (reducers, effects, path) {
+    function decorateActions (reducers: Model['reducers'], effects: Model['effects'], path: string[]) {
       const decoratedReducers = Object.keys(reducers || {}).map(key => ({
         [key]: function () {
           let oldState = Object.assign({}, state)
@@ -91,7 +116,7 @@ export default function twine (opts) {
       return decoratedReducers.concat(decoratedEffects).reduce(arrayToObj, {})
     }
 
-    function createActions (model, path) {
+    function createActions (model: Model, path: string[]) {
       if (model.models) {
         const child = Object.keys(model.models).map(key => ({
           [key]: createActions(model.models[key], path.concat(key)),
