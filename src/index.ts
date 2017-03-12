@@ -40,14 +40,10 @@ export function getNestedObjFromPath (state, path) {
 }
 
 export function updateStateAtPath (obj, path, value) {
-  let arr
-  let key
-  if (Array.isArray(path) && path.length > 0) {
-    arr = path.slice()
-    key = arr[0]
-    if (arr.length > 1) {
-      arr.shift()
-      obj[key] = updateStateAtPath(obj[key], arr, value)
+  if (path.length > 0) {
+    let key = path[0]
+    if (path.length > 1) {
+      obj[key] = updateStateAtPath(obj[key], path.slice(1), value)
     } else {
       obj[key] = value
     }
