@@ -38,21 +38,17 @@ function getNestedObjFromPath(state, path) {
     return state;
 }
 exports.getNestedObjFromPath = getNestedObjFromPath;
-function updateStateAtPath(obj, path, value) {
-    let arr;
-    let key;
-    if (Array.isArray(path) && path.length > 0) {
-        arr = path.slice();
-        key = arr[0];
-        if (arr.length > 1) {
-            arr.shift();
-            obj[key] = updateStateAtPath(obj[key], arr, value);
+function updateStateAtPath(state, path, value) {
+    if (path.length > 0) {
+        let key = path[0];
+        if (path.length > 1) {
+            state[key] = updateStateAtPath(state[key], path.slice(1), value);
         }
         else {
-            obj[key] = value;
+            state[key] = value;
         }
     }
-    return obj;
+    return state;
 }
 exports.updateStateAtPath = updateStateAtPath;
 function twine(opts) {
@@ -65,44 +61,38 @@ function twine(opts) {
         let state = createState(model);
         let actions = createActions(model, []);
         function decorateActions(reducers, effects, path) {
-            const decoratedReducers = Object.keys(reducers || {}).map(key => {
-                return {
-                    [key]: function () {
-                        let oldState = Object.assign({}, state);
-                        let localState = path.length ? getNestedObjFromPath(state, path) : state;
-                        let reducerArgs = [localState].concat(Array.prototype.slice.call(arguments));
-                        let reducerResponse = reducers[key].apply(null, reducerArgs);
-                        let newLocalState = Object.assign({}, localState, reducerResponse);
-                        state = path.length ? updateStateAtPath(state, path, newLocalState) : newLocalState;
-                        let onMethodCallArgs = [state, oldState].concat(Array.prototype.slice.call(arguments));
-                        onMethodCall.apply(null, onMethodCallArgs);
-                        onStateChange(state, oldState, actions);
-                        return newLocalState;
-                    },
-                };
-            });
-            const decoratedEffects = Object.keys(effects || {}).map(key => {
-                return {
-                    [key]: function () {
-                        if (path.length) {
-                            let nestedModel = retrieveNestedModel(model, path);
-                            let effectState = nestedModel.scoped ? getNestedObjFromPath(state, path) : state;
-                            let effectActions = nestedModel.scoped ? getNestedObjFromPath(actions, path) : actions;
-                            return effects[key].apply(null, [effectState, effectActions].concat(Array.prototype.slice.call(arguments)));
-                        }
-                        return effects[key].apply(null, [state, actions].concat(Array.prototype.slice.call(arguments)));
-                    },
-                };
-            });
+            const decoratedReducers = Object.keys(reducers || {}).map(key => ({
+                [key]: function () {
+                    let oldState = Object.assign({}, state);
+                    let localState = path.length ? getNestedObjFromPath(state, path) : state;
+                    let reducerArgs = [localState].concat(Array.prototype.slice.call(arguments));
+                    let reducerResponse = reducers[key].apply(null, reducerArgs);
+                    let newLocalState = Object.assign({}, localState, reducerResponse);
+                    state = path.length ? updateStateAtPath(state, path, newLocalState) : newLocalState;
+                    let onMethodCallArgs = [state, oldState].concat(Array.prototype.slice.call(arguments));
+                    onMethodCall.apply(null, onMethodCallArgs);
+                    onStateChange(state, oldState, actions);
+                    return newLocalState;
+                },
+            }));
+            const decoratedEffects = Object.keys(effects || {}).map(key => ({
+                [key]: function () {
+                    if (path.length) {
+                        let nestedModel = retrieveNestedModel(model, path);
+                        let effectState = nestedModel.scoped ? getNestedObjFromPath(state, path) : state;
+                        let effectActions = nestedModel.scoped ? getNestedObjFromPath(actions, path) : actions;
+                        return effects[key].apply(null, [effectState, effectActions].concat(Array.prototype.slice.call(arguments)));
+                    }
+                    return effects[key].apply(null, [state, actions].concat(Array.prototype.slice.call(arguments)));
+                },
+            }));
             return decoratedReducers.concat(decoratedEffects).reduce(arrayToObj, {});
         }
         function createActions(model, path) {
             if (model.models) {
-                const child = Object.keys(model.models).map(key => {
-                    return {
-                        [key]: createActions(model.models[key], path.concat(key)),
-                    };
-                }).reduce(arrayToObj, {});
+                const child = Object.keys(model.models).map(key => ({
+                    [key]: createActions(model.models[key], path.concat(key)),
+                })).reduce(arrayToObj, {});
                 return Object.assign({}, decorateActions(model.reducers, model.effects, path), child);
             }
             return decorateActions(model.reducers, model.effects, path);
