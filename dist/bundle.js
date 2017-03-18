@@ -44,20 +44,16 @@ function getNestedObjFromPath(state, path) {
     return state;
 }
 exports.getNestedObjFromPath = getNestedObjFromPath;
-function updateStateAtPath(obj, path, value) {
-    var arr = void 0;
-    var key = void 0;
-    if (Array.isArray(path) && path.length > 0) {
-        arr = path.slice();
-        key = arr[0];
-        if (arr.length > 1) {
-            arr.shift();
-            obj[key] = updateStateAtPath(obj[key], arr, value);
+function updateStateAtPath(state, path, value) {
+    if (path.length > 0) {
+        var key = path[0];
+        if (path.length > 1) {
+            state[key] = updateStateAtPath(state[key], path.slice(1), value);
         } else {
-            obj[key] = value;
+            state[key] = value;
         }
     }
-    return obj;
+    return state;
 }
 exports.updateStateAtPath = updateStateAtPath;
 function twine(opts) {
