@@ -6,6 +6,7 @@ export declare type Opts = Subscriber | {
 };
 export interface Model {
     state?: any;
+    scoped?: boolean;
     reducers?: {
         [key: string]: (state: any, ...args) => any;
     };
@@ -17,14 +18,14 @@ export interface Model {
     };
 }
 export interface State {
-    [key: string]: State;
+    [key: string]: State | any;
 }
 export declare function merge(model: Model, prop: string): any;
 export declare function createState(model: Model): any;
 export declare function retrieveNestedModel(model: Model, path: string[], index?: number): any;
 export declare function getNestedObjFromPath(state: State, path: string[]): any;
 export declare function updateStateAtPath(state: State, path: string[], value: any): State;
-export default function twine(opts: Opts): (model: Model) => {
+export default function twine(opts?: Opts): (model: Model) => {
     state: any;
     actions: any;
 };

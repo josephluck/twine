@@ -8,6 +8,7 @@ export type Opts = Subscriber | {
 
 export interface Model {
   state?: any
+  scoped?: boolean
   reducers?: {
     [key: string]: (state: any, ...args) => any,
   }
@@ -20,7 +21,7 @@ export interface Model {
 }
 
 export interface State {
-  [key: string]: State
+  [key: string]: State | any
 }
 
 function noop () {
@@ -76,7 +77,7 @@ export function updateStateAtPath (state: State, path: string[], value: any) {
   return state
 }
 
-export default function twine (opts: Opts) {
+export default function twine (opts?: Opts) {
   if (!opts) {
     opts = noop
   }
@@ -99,7 +100,7 @@ export default function twine (opts: Opts) {
           let onMethodCallArgs = [state, oldState].concat(Array.prototype.slice.call(arguments))
           onMethodCall.apply(null, onMethodCallArgs)
           onStateChange(state, oldState, actions)
-          return newLocalState
+          return state
         },
       }))
       const decoratedEffects = Object.keys(effects || {}).map(key => ({

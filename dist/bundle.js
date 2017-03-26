@@ -77,7 +77,7 @@ function twine(opts) {
                     var onMethodCallArgs = [state, oldState].concat(Array.prototype.slice.call(arguments));
                     onMethodCall.apply(null, onMethodCallArgs);
                     onStateChange(state, oldState, actions);
-                    return newLocalState;
+                    return state;
                 });
             });
             var decoratedEffects = Object.keys(effects || {}).map(function (key) {
