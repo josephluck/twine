@@ -1,5 +1,5 @@
 export type Subscriber = (state: State, prev: State, actions: any) => any
-export type OnMethodCall = (state: State, prev: State, ...args) => any
+export type OnMethodCall = (state: State, prev: State, ...args: any[]) => any
 
 export type Opts = Subscriber | {
   onStateChange: Subscriber,
@@ -10,10 +10,10 @@ export interface Model {
   state?: any
   scoped?: boolean
   reducers?: {
-    [key: string]: (state: any, ...args) => any,
+    [key: string]: (state: any, ...args: any[]) => any,
   }
   effects?: {
-    [key: string]: (state: any, actions: any, ...args) => any,
+    [key: string]: (state: any, actions: any, ...args: any[]) => any,
   }
   models?: {
     [key: string]: Model,

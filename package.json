@@ -1,22 +1,22 @@
 {
   "name": "twine-js",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "description": "Functional front-end state management",
-  "main": "./dist/index.js",
+  "main": "./lib/index.js",
   "files": [
     "src/",
-    "dist/"
+    "lib/"
   ],
   "repository": {
     "type" : "git",
     "url" : "https://github.com/josephluck/twine"
   },
-  "types": "./dist/index.d.ts",
+  "types": "./lib/index.d.ts",
   "scripts": {
     "test": "ts-node node_modules/.bin/tape ./test/index.spec.ts | tap-spec",
-    "dist": "tsc && npm run browserify && npm run minify",
-    "browserify": "browserify -g babelify dist/index.js -o dist/bundle.js",
-    "minify": "uglifyjs dist/bundle.js -c -m -o dist/bundle.min.js",
+    "dist": "rm -rf ./lib && mkdir lib && tsc && npm run browserify && npm run minify",
+    "browserify": "browserify -g babelify lib/index.js -o lib/bundle.js",
+    "minify": "uglifyjs lib/bundle.js -c -m -o lib/bundle.min.js",
     "deploy": "npm run dist && npm publish"
   },
   "author": "Joseph Luck",

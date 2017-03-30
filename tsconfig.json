@@ -7,7 +7,7 @@
 		"allowSyntheticDefaultImports": true,
 		"preserveConstEnums": true,
 		"declaration": true,
-		"outDir": "dist",
+		"outDir": "lib",
 		"sourceMap": false,
 		"lib": [
 			"es6",
