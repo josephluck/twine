@@ -248,6 +248,75 @@ test('twine / reducers / return from invocation', function (t) {
   const secondReducerReturn = app.actions.secondReducer()
   t.equal(typeof secondReducerReturn.title, 'number', 'second reducer returned correctly')
 })
+test('twine / reducers / return global state', function (t) {
+  t.plan(20)
+  let state
+  const app = twine((_state) => state = _state)({
+    state: {
+      title: 'not set',
+      foo: 'untouched',
+    },
+    reducers: {
+      firstReducer (state, title) {
+        return {title}
+      },
+    },
+    models: {
+      nested: {
+        state: {
+          title: 'not set',
+        },
+        reducers: {
+          secondReducer (state, title) {
+            return {
+              title,
+            }
+          },
+        },
+        models: {
+          nestedAgain: {
+            scoped: true,
+            state: {
+              title: 'nested again',
+            },
+            reducers: {
+              thirdReducer (state, title) {
+                return {
+                  title,
+                }
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+  const reducer1 = app.actions.firstReducer('bar')
+  t.equal(reducer1.title, 'bar', 'state is correct after first reducer')
+  t.equal(reducer1.foo, 'untouched', 'state is correct after first reducer')
+  t.equal(reducer1.nested.title, 'not set', 'state is correct after first reducer')
+  t.equal(reducer1.nested.nestedAgain.title, 'nested again', 'scoped models state is correct after first reducer')
+  const reducer2 = app.actions.firstReducer('baz')
+  t.equal(reducer2.title, 'baz', 'state is correct after second reducer')
+  t.equal(reducer2.foo, 'untouched', 'state is correct after second reducer')
+  t.equal(reducer2.nested.title, 'not set', 'state is correct after second reducer')
+  t.equal(reducer2.nested.nestedAgain.title, 'nested again', 'scoped models state is correct after second reducer')
+  const reducer3 = app.actions.nested.secondReducer('update me')
+  t.equal(reducer3.title, 'baz', 'state is correct after third reducer')
+  t.equal(reducer3.foo, 'untouched', 'state is correct after third reducer')
+  t.equal(reducer3.nested.title, 'update me', 'state is correct after third reducer')
+  t.equal(reducer3.nested.nestedAgain.title, 'nested again', 'scoped models state is correct after third reducer')
+  const reducer4 = app.actions.nested.secondReducer('update meeeeee')
+  t.equal(reducer4.title, 'baz', 'state is correct after fourth reducer')
+  t.equal(reducer4.foo, 'untouched', 'state is correct after fourth reducer')
+  t.equal(reducer4.nested.title, 'update meeeeee', 'state is correct after fourth reducer')
+  t.equal(reducer4.nested.nestedAgain.title, 'nested again', 'scoped models state is correct after fourth reducer')
+  const reducer5 = app.actions.nested.nestedAgain.thirdReducer('updated')
+  t.equal(reducer5.title, 'baz', 'state is correct after fourth reducer')
+  t.equal(reducer5.foo, 'untouched', 'state is correct after fourth reducer')
+  t.equal(reducer5.nested.title, 'update meeeeee', 'state is correct after fourth reducer')
+  t.equal(reducer5.nested.nestedAgain.title, 'updated', 'scoped models state is correct after fourth reducer')
+})
 test('twine / reducers / update state', function (t) {
   t.plan(12)
   let state
