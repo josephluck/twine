@@ -88,7 +88,7 @@ test('twine / reducers / return from invocation', function (t) {
   t.equal(typeof secondReducerReturn.title, 'number', 'second reducer returned correctly')
 })
 test('twine / reducers / return global state', function (t) {
-  t.plan(20)
+  t.plan(17)
   let state
   const app = twine((_state) => state = _state)({
     state: {
@@ -151,10 +151,7 @@ test('twine / reducers / return global state', function (t) {
   t.equal(reducer4.nested.title, 'update meeeeee', 'state is correct after fourth reducer')
   t.equal(reducer4.nested.nestedAgain.title, 'nested again', 'scoped models state is correct after fourth reducer')
   const reducer5 = app.actions.nested.nestedAgain.thirdReducer('updated')
-  t.equal(reducer5.title, 'baz', 'state is correct after fourth reducer')
-  t.equal(reducer5.foo, 'untouched', 'state is correct after fourth reducer')
-  t.equal(reducer5.nested.title, 'update meeeeee', 'state is correct after fourth reducer')
-  t.equal(reducer5.nested.nestedAgain.title, 'updated', 'scoped models state is correct after fourth reducer')
+  t.equal(reducer5.title, 'updated', 'state is correct after fourth (scoped) reducer')
 })
 test('twine / reducers / update state', function (t) {
   t.plan(12)
@@ -363,6 +360,5 @@ test('twine / scoped / reducers return local state', function (t) {
   const reducer1 = app.actions.counter.increment()
   t.equal(reducer1.count, 2, 'second reducer returned local state')
   const reducer2 = app.actions.counter.anotherModel.update()
-  console.log(reducer2)
   t.equal(reducer2.myState, 'updated', 'second reducer returned local state')
 })
