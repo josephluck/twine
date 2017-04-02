@@ -13,7 +13,7 @@
   },
   "types": "./lib/index.d.ts",
   "scripts": {
-    "test": "ts-node node_modules/.bin/tape ./test/index.spec.ts | tap-spec",
+    "test": "ts-node node_modules/.bin/tape ./test/*.spec.ts | tap-spec",
     "dist": "rm -rf ./lib && mkdir lib && tsc && npm run browserify && npm run minify",
     "browserify": "browserify -g babelify lib/index.js -o lib/bundle.js",
     "minify": "uglifyjs lib/bundle.js -c -m -o lib/bundle.min.js",
