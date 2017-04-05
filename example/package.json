@@ -1,11 +1,11 @@
 {
-  "name": "helix-yo-yo-basic",
+  "name": "twine-example",
   "version": "1.0.0",
-  "description": "Basic example of helix with yo-yo as the renderer",
+  "description": "Example of twine as a state management library",
   "main": "./src/index.ts",
   "scripts": {
     "dev": "budo ./src/index.ts --live --pushstate --host=localhost --port=8888 --base=/ -- -t babelify -p tsify"
-  },
+  }, 
   "author": "Joseph Luck",
   "license": "ISC",
   "devDependencies": {
