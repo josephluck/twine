@@ -1,0 +1,25 @@
+{
+  "name": "helix-yo-yo-basic",
+  "version": "1.0.0",
+  "description": "Basic example of helix with yo-yo as the renderer",
+  "main": "./src/index.ts",
+  "scripts": {
+    "dev": "budo ./src/index.ts --live --pushstate --host=localhost --port=8888 --base=/ -- -t babelify -p tsify"
+  },
+  "author": "Joseph Luck",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.23.0",
+    "babel-preset-es2015": "^6.22.0",
+    "babel-preset-stage-0": "^6.22.0",
+    "babelify": "^7.3.0",
+    "budo": "^9.4.7",
+    "tsify": "^3.0.1",
+    "tslint": "^4.4.2",
+    "typescript": "^2.2.1",
+    "@types/node": "^7.0.5",
+    "browserify": "^14.1.0",
+    "tslint-config-standard": "^4.0.0",
+    "yo-yo": "1.4.0"
+  }
+}

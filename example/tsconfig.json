@@ -1,0 +1,24 @@
+{
+	"compilerOptions": {
+		"target": "es6",
+		"module": "commonjs",
+		"allowJs": false,
+		"moduleResolution": "node",
+		"allowSyntheticDefaultImports": true,
+		"preserveConstEnums": true,
+		"declaration": true,
+		"outDir": "dist",
+		"sourceMap": false,
+		"lib": [
+			"es6",
+			"es7",
+			"dom"
+		],
+		"noUnusedLocals": true,
+		"strictNullChecks": false,
+		"removeComments": false
+	},
+	"include": [
+		"src/**/*"
+  ]
+}
