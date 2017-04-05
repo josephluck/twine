@@ -1,9 +1,11 @@
 export type Subscriber = (state: State, prev: State, actions: any) => any
-export type OnMethodCall = (state: State, prev: State, ...args: any[]) => any
+export type OnReducerCalled = (state: State, prev: State, name: string, ...args: any[]) => any
+export type OnEffectCalled = (prev: State, name: string, ...args: any[]) => any
 
 export type Plugin = Subscriber | {
   onStateChange?: Subscriber,
-  onMethodCall?: OnMethodCall,
+  onReducerCalled?: OnReducerCalled,
+  onEffectCalled?: OnEffectCalled,
 }
 
 export type Opts = Plugin | Plugin[]
@@ -89,17 +91,20 @@ export function onStateChange (plugins: Plugin[], state, prev, actions) {
   })
 }
 
-export function onMethodCall (plugins, state, prev, args) {
+export function onReducerCalled (plugins, state, prev, name, args) {
   return plugins.map(plugin => {
-    if (typeof plugin === 'object' && plugin.onMethodCall) {
-      plugin.onMethodCall.apply(null, [state, prev].concat(args))
+    if (typeof plugin === 'object' && plugin.onReducerCalled) {
+      plugin.onReducerCalled.apply(null, [state, prev, name].concat(args))
     }
   })
 }
 
-export function callPlugins (plugins: Plugin[], state, prev, actions, args) {
-  onStateChange(plugins, state, prev, actions)
-  onMethodCall(plugins, state, prev, args)
+export function onEffectCalled (plugins, prev, name, args) {
+  return plugins.map(plugin => {
+    if (typeof plugin === 'object' && plugin.onEffectCalled) {
+      plugin.onEffectCalled.apply(null, [prev, name].concat(args))
+    }
+  })
 }
 
 export default function twine (opts?: Opts) {
@@ -115,27 +120,36 @@ export default function twine (opts?: Opts) {
     function decorateActions (reducers: Model['reducers'], effects: Model['effects'], path: string[]) {
       const decoratedReducers = Object.keys(reducers || {}).map(key => ({
         [key]: function () {
+          let reducer = reducers[key]
           let nestedModel = retrieveNestedModel(model, path)
           let oldState = Object.assign({}, state)
           let localState = path.length ? getNestedObjFromPath(state, path) : state
           let reducerArgs = [localState].concat(Array.prototype.slice.call(arguments))
-          let reducerResponse = reducers[key].apply(null, reducerArgs)
+          let reducerResponse = reducer.apply(null, reducerArgs)
           let newState = Object.assign({}, localState, reducerResponse)
           let args = Array.prototype.slice.call(arguments)
           state = path.length ? updateStateAtPath(state, path, newState) : newState
-          callPlugins(plugins, state, oldState, actions, args)
+          onReducerCalled(plugins, state, oldState, reducer.name, args)
+          onStateChange(plugins, state, oldState, actions)
           return path.length && nestedModel.scoped ? reducerResponse : state
         },
       }))
       const decoratedEffects = Object.keys(effects || {}).map(key => ({
         [key]: function () {
+          const effect = effects[key]
           if (path.length) {
             let nestedModel = retrieveNestedModel(model, path)
             let effectState = nestedModel.scoped ? getNestedObjFromPath(state, path) : state
             let effectActions = nestedModel.scoped ? getNestedObjFromPath(actions, path) : actions
-            return effects[key].apply(null, [effectState, effectActions].concat(Array.prototype.slice.call(arguments)))
+            const args = Array.prototype.slice.call(arguments)
+            const effectArgs = [effectState, effectActions].concat(args)
+            onEffectCalled(plugins, state, effect.name, args)
+            return effects[key].apply(null, effectArgs)
           }
-          return effects[key].apply(null, [state, actions].concat(Array.prototype.slice.call(arguments)))
+          const args = Array.prototype.slice.call(arguments)
+          const effectArgs = [state, actions].concat(args)
+          onEffectCalled(plugins, state, effect.name, args)
+          return effects[key].apply(null, effectArgs)
         },
       }))
       return decoratedReducers.concat(decoratedEffects).reduce(arrayToObj, {})
