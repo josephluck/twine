@@ -1,10 +1,12 @@
 export type Subscriber = (state: State, prev: State, actions: any) => any
 export type OnMethodCall = (state: State, prev: State, ...args: any[]) => any
 
-export type Opts = Subscriber | {
-  onStateChange: Subscriber,
-  onMethodCall: OnMethodCall,
+export type Plugin = Subscriber | {
+  onStateChange?: Subscriber,
+  onMethodCall?: OnMethodCall,
 }
+
+export type Opts = Plugin | Plugin[]
 
 export interface Model {
   state?: any
@@ -77,12 +79,34 @@ export function updateStateAtPath (state: State, path: string[], value: any) {
   return state
 }
 
+export function onStateChange (plugins: Plugin[], state, prev, actions) {
+  return plugins.map(plugin => {
+    if (typeof plugin === 'function') {
+      plugin(state, prev, actions)
+    } else if (typeof plugin === 'object' && plugin.onStateChange) {
+      plugin.onStateChange(state, prev, actions)
+    }
+  })
+}
+
+export function onMethodCall (plugins, state, prev, args) {
+  return plugins.map(plugin => {
+    if (typeof plugin === 'object' && plugin.onMethodCall) {
+      plugin.onMethodCall.apply(null, [state, prev].concat(args))
+    }
+  })
+}
+
+export function callPlugins (plugins: Plugin[], state, prev, actions, args) {
+  onStateChange(plugins, state, prev, actions)
+  onMethodCall(plugins, state, prev, args)
+}
+
 export default function twine (opts?: Opts) {
   if (!opts) {
     opts = noop
   }
-  let onStateChange = typeof opts === 'function' ? opts : opts.onStateChange || noop
-  let onMethodCall = typeof opts === 'function' ? noop : opts.onMethodCall || noop
+  let plugins = typeof opts === 'object' && Array.isArray(opts) ? opts : [opts]
 
   return function output (model: Model) {
     let state = createState(model)
@@ -97,15 +121,10 @@ export default function twine (opts?: Opts) {
           let reducerArgs = [localState].concat(Array.prototype.slice.call(arguments))
           let reducerResponse = reducers[key].apply(null, reducerArgs)
           let newState = Object.assign({}, localState, reducerResponse)
+          let args = Array.prototype.slice.call(arguments)
           state = path.length ? updateStateAtPath(state, path, newState) : newState
-          let onMethodCallArgs = [state, oldState].concat(Array.prototype.slice.call(arguments))
-          onMethodCall.apply(null, onMethodCallArgs)
-          onStateChange(state, oldState, actions)
-          if (path.length && nestedModel.scoped) {
-            return reducerResponse
-          } else {
-            return state
-          }
+          callPlugins(plugins, state, oldState, actions, args)
+          return path.length && nestedModel.scoped ? reducerResponse : state
         },
       }))
       const decoratedEffects = Object.keys(effects || {}).map(key => ({

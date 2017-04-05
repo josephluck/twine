@@ -8,7 +8,11 @@ function subscribe (_state, _prev, _actions) {
   render()
 }
 
-let {state, actions} = twine(subscribe)({
+const plugins = [{
+  onStateChange: subscribe,
+}]
+
+let {state, actions} = twine(plugins)({
   state: {
     title: 'foo',
   },
