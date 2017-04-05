@@ -1,6 +1,6 @@
 {
   "name": "twine-js",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Functional front-end state management",
   "main": "./lib/index.js",
   "files": [
