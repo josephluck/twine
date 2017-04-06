@@ -107,6 +107,26 @@ export function onEffectCalled (plugins, prev, name, args) {
   })
 }
 
+export function wrapReducer (plugins, reducer) {
+  return plugins.reduce((prev, plugin) => {
+    if (typeof plugin === 'object' && plugin.wrapReducers) {
+      return plugin.wrapReducers(prev)
+    } else {
+      return prev
+    }
+  }, reducer)
+}
+
+export function wrapEffect (plugins, effect) {
+  return plugins.reduce((prev, plugin) => {
+    if (typeof plugin === 'object' && plugin.wrapEffects) {
+      return plugin.wrapEffects(prev)
+    } else {
+      return prev
+    }
+  }, effect)
+}
+
 export default function twine (opts?: Opts) {
   if (!opts) {
     opts = noop
@@ -118,29 +138,32 @@ export default function twine (opts?: Opts) {
     let actions = createActions(model, [])
 
     function decorateActions (reducers: Model['reducers'], effects: Model['effects'], path: string[]) {
-      const decoratedReducers = Object.keys(reducers || {}).map(key => ({
-        [key]: function () {
-          let reducer = reducers[key]
-          let nestedModel = retrieveNestedModel(model, path)
-          let oldState = Object.assign({}, state)
-          let localState = path.length ? getNestedObjFromPath(state, path) : state
-          let reducerArgs = [localState].concat(Array.prototype.slice.call(arguments))
-          let reducerResponse = reducer.apply(null, reducerArgs)
-          let newState = Object.assign({}, localState, reducerResponse)
-          let args = Array.prototype.slice.call(arguments)
+      const decoratedReducers = Object.keys(reducers || {}).map(key => {
+        const reducer = reducers[key]
+        const decoratedReducer = function () {
+          const nestedModel = retrieveNestedModel(model, path)
+          const oldState = Object.assign({}, state)
+          const localState = path.length ? getNestedObjFromPath(state, path) : state
+          const reducerArgs = [localState].concat(Array.prototype.slice.call(arguments))
+          const reducerResponse = reducer.apply(null, reducerArgs)
+          const newState = Object.assign({}, localState, reducerResponse)
+          const args = Array.prototype.slice.call(arguments)
           state = path.length ? updateStateAtPath(state, path, newState) : newState
           onReducerCalled(plugins, state, oldState, reducer.name, args)
           onStateChange(plugins, state, oldState, actions)
           return path.length && nestedModel.scoped ? reducerResponse : state
-        },
-      }))
-      const decoratedEffects = Object.keys(effects || {}).map(key => ({
-        [key]: function () {
-          const effect = effects[key]
+        }
+        const wrappedReducer = wrapReducer(plugins, decoratedReducer)
+        Object.defineProperty(wrappedReducer, 'name', {value: reducer.name})
+        return { [key]: wrappedReducer }
+      })
+      const decoratedEffects = Object.keys(effects || {}).map(key => {
+        const effect = effects[key]
+        const decoratedEffect = function () {
           if (path.length) {
-            let nestedModel = retrieveNestedModel(model, path)
-            let effectState = nestedModel.scoped ? getNestedObjFromPath(state, path) : state
-            let effectActions = nestedModel.scoped ? getNestedObjFromPath(actions, path) : actions
+            const nestedModel = retrieveNestedModel(model, path)
+            const effectState = nestedModel.scoped ? getNestedObjFromPath(state, path) : state
+            const effectActions = nestedModel.scoped ? getNestedObjFromPath(actions, path) : actions
             const args = Array.prototype.slice.call(arguments)
             const effectArgs = [effectState, effectActions].concat(args)
             onEffectCalled(plugins, state, effect.name, args)
@@ -150,8 +173,11 @@ export default function twine (opts?: Opts) {
           const effectArgs = [state, actions].concat(args)
           onEffectCalled(plugins, state, effect.name, args)
           return effects[key].apply(null, effectArgs)
-        },
-      }))
+        }
+        const wrappedEffect = wrapEffect(plugins, decoratedEffect)
+        Object.defineProperty(wrappedEffect, 'name', {value: effect.name})
+        return { [key]: wrappedEffect }
+      })
       return decoratedReducers.concat(decoratedEffects).reduce(arrayToObj, {})
     }
 
