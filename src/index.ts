@@ -12,6 +12,7 @@ export type Opts = Plugin | Plugin[]
 
 export interface Model {
   state?: any
+  computed?: (state) => any
   scoped?: boolean
   reducers?: {
     [key: string]: (state: any, ...args: any[]) => any,
