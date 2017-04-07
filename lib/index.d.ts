@@ -9,6 +9,7 @@ export declare type Plugin = Subscriber | {
 export declare type Opts = Plugin | Plugin[];
 export interface Model {
     state?: any;
+    computed?: (state) => any;
     scoped?: boolean;
     reducers?: {
         [key: string]: (state: any, ...args: any[]) => any;
@@ -23,7 +24,7 @@ export interface Model {
 export interface State {
     [key: string]: State | any;
 }
-export declare function merge(model: Model, prop: string): any;
+export declare function mergeState(model: Model): any;
 export declare function createState(model: Model): any;
 export declare function retrieveNestedModel(model: Model, path: string[], index?: number): any;
 export declare function getNestedObjFromPath(state: State, path: string[]): any;
@@ -31,6 +32,8 @@ export declare function updateStateAtPath(state: State, path: string[], value: a
 export declare function onStateChange(plugins: Plugin[], state: any, prev: any, actions: any): void[];
 export declare function onReducerCalled(plugins: any, state: any, prev: any, name: any, args: any): any;
 export declare function onEffectCalled(plugins: any, prev: any, name: any, args: any): any;
+export declare function wrapReducer(plugins: any, reducer: any): any;
+export declare function wrapEffect(plugins: any, effect: any): any;
 export default function twine(opts?: Opts): (model: Model) => {
     state: any;
     actions: any;
