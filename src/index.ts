@@ -43,10 +43,9 @@ export function mergeState (model: Model) {
       [key]: mergeState(model.models[key]),
     })).reduce(arrayToObj, {})
 
-    const localState = model['state']
+    const localState = Object.assign({}, model['state'], child)
     const computedState = model.computed ? model.computed(localState) : {}
-    const state = Object.assign({}, localState, computedState)
-    return Object.assign({}, state, child)
+    return Object.assign({}, localState, computedState)
   }
   const localState = model['state']
   const computedState = model.computed ? model.computed(localState) : {}
