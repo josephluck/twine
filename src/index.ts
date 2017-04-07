@@ -37,19 +37,24 @@ function arrayToObj (curr, prev) {
   return Object.assign({}, curr, prev)
 }
 
-export function merge (model: Model, prop: string) {
+export function mergeState (model: Model) {
   if (model.models) {
     let child = Object.keys(model.models).map(key => ({
-      [key]: merge(model.models[key], prop),
+      [key]: mergeState(model.models[key]),
     })).reduce(arrayToObj, {})
 
-    return Object.assign({}, model[prop], child)
+    const localState = model['state']
+    const computedState = model.computed ? model.computed(localState) : {}
+    const state = Object.assign({}, localState, computedState)
+    return Object.assign({}, state, child)
   }
-  return model[prop]
+  const localState = model['state']
+  const computedState = model.computed ? model.computed(localState) : {}
+  return Object.assign({}, localState, computedState)
 }
 
 export function createState (model: Model) {
-  return merge(model, 'state')
+  return mergeState(model)
 }
 
 export function retrieveNestedModel (model: Model, path: string[], index: number = 0) {
@@ -142,17 +147,22 @@ export default function twine (opts?: Opts) {
       const decoratedReducers = Object.keys(reducers || {}).map(key => {
         const reducer = reducers[key]
         const decoratedReducer = function () {
-          const nestedModel = retrieveNestedModel(model, path)
-          const oldState = Object.assign({}, state)
-          const localState = path.length ? getNestedObjFromPath(state, path) : state
-          const reducerArgs = [localState].concat(Array.prototype.slice.call(arguments))
+          // Call reducer & update the global state
+          const currentModel = retrieveNestedModel(model, path) || model
+          const previousState = Object.assign({}, state)
+          const currentModelsState = path.length ? getNestedObjFromPath(state, path) : previousState
+          const reducerArgs = [currentModelsState].concat(Array.prototype.slice.call(arguments))
           const reducerResponse = reducer.apply(null, reducerArgs)
-          const newState = Object.assign({}, localState, reducerResponse)
-          const args = Array.prototype.slice.call(arguments)
-          state = path.length ? updateStateAtPath(state, path, newState) : newState
-          onReducerCalled(plugins, state, oldState, reducer.name, args)
-          onStateChange(plugins, state, oldState, actions)
-          return path.length && nestedModel.scoped ? reducerResponse : state
+          const modelStateAfterReducer = Object.assign({}, currentModelsState, reducerResponse)
+          const modelComputedState = currentModel.computed ? currentModel.computed(modelStateAfterReducer) : {}
+          const newModelState = Object.assign({}, modelStateAfterReducer, modelComputedState)
+          state = path.length ? updateStateAtPath(state, path, newModelState) : newModelState
+
+          // Plugins
+          const pluginArgs = Array.prototype.slice.call(arguments)
+          onReducerCalled(plugins, state, previousState, reducer.name, pluginArgs)
+          onStateChange(plugins, state, previousState, actions)
+          return path.length && currentModel.scoped ? reducerResponse : state
         }
         const wrappedReducer = wrapReducer(plugins, decoratedReducer)
         Object.defineProperty(wrappedReducer, 'name', {value: reducer.name})

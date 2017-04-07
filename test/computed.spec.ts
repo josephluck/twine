@@ -1,14 +1,14 @@
 import * as test from 'tape'
 import twine from '../src/index'
 
-test.skip('twine / computed / computed state called on instantiation', function (t) {
-  t.plan(2)
-  let state
-  twine((_state) => state = _state)({
+test('twine / computed / computed state called on instantiation', function (t) {
+  t.plan(3)
+  let {state} = twine((_state) => state = _state)({
     state: {
       title: 'not set',
     },
     computed () {
+      t.pass('computed state called on instantiation')
       return {
         foo: 'foo',
       }
