@@ -7,4 +7,4 @@ Warning: this isn't a finished library! Use with caution.
 - People who use typescript and want their state management fully typed thoughout their app
 
 ## Examples:
-The easiest way to see the API is by looking at [the tests](test/index.spec.js)!
+The easiest way to see the API is by looking at [the tests](test)!
