@@ -137,9 +137,8 @@ test('twine / computed / computed state called on state updates', function (t) {
 })
 
 test('twine / computed / computed state receives child models state on state updates', function (t) {
-  t.plan(6)
-  let state
-  const app = twine((_state) => state = _state)({
+  t.plan(7)
+  let {state, actions} = twine((_state) => state = _state)({
     state: {
       title: 'not set',
     },
@@ -172,5 +171,52 @@ test('twine / computed / computed state receives child models state on state upd
       },
     },
   })
-  app.actions.update()
+  t.equal(state.anotherModel.def, 246, 'computed state in child model is correct')
+  actions.update()
+})
+
+test('twine / computed / reducers receive state including computed state', function (t) {
+  t.plan(4)
+  let {state, actions} = twine((_state) => state = _state)({
+    state: {
+      title: 'not set',
+    },
+    computed (state) {
+      t.pass('computed state called on state updates')
+      return {
+        foo: 'foo',
+      }
+    },
+    reducers: {
+      update (state) {
+        t.equal(state.title, 'not set', 'reducer received computed state')
+        t.equal(state.foo, 'foo', 'reducer received computed state')
+        return {
+          title: 'set',
+        }
+      },
+    },
+  })
+  actions.update()
+})
+
+test('twine / computed / effects receive state including computed state', function (t) {
+  t.plan(2)
+  let {state, actions} = twine((_state) => state = _state)({
+    state: {
+      title: 'not set',
+    },
+    computed (state) {
+      return {
+        foo: 'foo',
+      }
+    },
+    effects: {
+      update (state) {
+        t.equal(state.title, 'not set', 'reducer received computed state')
+        t.equal(state.foo, 'foo', 'reducer received computed state')
+      },
+    },
+  })
+  actions.update()
 })
