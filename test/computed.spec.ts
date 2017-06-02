@@ -74,7 +74,6 @@ test('twine / computed / computed state receives state with nested models state'
       title: 'not set',
     },
     computed (localState) {
-      console.log(localState)
       t.equal(localState.title, 'not set', 'computed state received title')
       t.equal(localState.anotherModel.bar, '123', 'computed state receives nested models state')
       return {
