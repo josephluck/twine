@@ -67,9 +67,9 @@ export function retrieveNestedModel (model: Model, path: string[], index: number
   return model
 }
 
-export function getNestedObjFromPath (state: State, path: string[]) {
+export function getStateFromPath (state: State, path: string[]) {
   if (path.length) {
-    return getNestedObjFromPath(state[path[0]], path.slice(1))
+    return getStateFromPath(state[path[0]], path.slice(1))
   }
   return state
 }
@@ -84,6 +84,28 @@ export function updateStateAtPath (state: State, path: string[], value: any) {
     }
   }
   return state
+}
+
+export function recursivelyUpdateComputedState (model: Model, state: State, path: string[]) {
+  const currentModel = retrieveNestedModel(model, path)
+  const currentState = getStateFromPath(state, path)
+  const computedState = currentModel
+    ? currentModel.computed ? currentModel.computed(currentState) : {}
+    : model.computed ? model.computed(currentState) : {}
+  if (path.length > 0) {
+    const newState = updateStateAtPath(state, path, {
+      ...currentState,
+      ...computedState,
+    })
+    const newPath = path.slice(0, path.length - 1)
+    return recursivelyUpdateComputedState(model, newState, newPath)
+  } else {
+    const newState = {
+      ...currentState,
+      ...computedState,
+    }
+    return newState
+  }
 }
 
 export function onStateChange (plugins: Plugin[], state, prev, actions) {
@@ -149,13 +171,12 @@ export default function twine (opts?: Opts) {
           // Call reducer & update the global state
           const currentModel = retrieveNestedModel(model, path) || model
           const previousState = Object.assign({}, state)
-          const currentModelsState = path.length ? getNestedObjFromPath(state, path) : previousState
+          const currentModelsState = path.length ? getStateFromPath(state, path) : previousState
           const reducerArgs = [currentModelsState].concat(Array.prototype.slice.call(arguments))
           const reducerResponse = reducer.apply(null, reducerArgs)
-          const modelStateAfterReducer = Object.assign({}, currentModelsState, reducerResponse)
-          const modelComputedState = currentModel.computed ? currentModel.computed(modelStateAfterReducer) : {}
-          const newModelState = Object.assign({}, modelStateAfterReducer, modelComputedState)
-          state = path.length ? updateStateAtPath(state, path, newModelState) : newModelState
+          const newState = Object.assign({}, currentModelsState, reducerResponse)
+          state = path.length ? updateStateAtPath(state, path, newState) : newState
+          state = recursivelyUpdateComputedState(model, state, path)
 
           // Plugins
           const pluginArgs = Array.prototype.slice.call(arguments)
@@ -172,8 +193,8 @@ export default function twine (opts?: Opts) {
         const decoratedEffect = function () {
           if (path.length) {
             const nestedModel = retrieveNestedModel(model, path)
-            const effectState = nestedModel.scoped ? getNestedObjFromPath(state, path) : state
-            const effectActions = nestedModel.scoped ? getNestedObjFromPath(actions, path) : actions
+            const effectState = nestedModel.scoped ? getStateFromPath(state, path) : state
+            const effectActions = nestedModel.scoped ? getStateFromPath(actions, path) : actions
             const args = Array.prototype.slice.call(arguments)
             const effectArgs = [effectState, effectActions].concat(args)
             onEffectCalled(plugins, state, effect.name, args)

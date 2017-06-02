@@ -213,10 +213,86 @@ test('twine / computed / effects receive state including computed state', functi
     },
     effects: {
       update (state) {
-        t.equal(state.title, 'not set', 'reducer received computed state')
-        t.equal(state.foo, 'foo', 'reducer received computed state')
+        t.equal(state.title, 'not set', 'effect received computed state')
+        t.equal(state.foo, 'foo', 'effect received computed state')
       },
     },
   })
   actions.update()
+})
+
+test('twine / computed / computed functions in parent models trigger when child models change state', function (t) {
+  t.plan(12)
+  let parentCounter = -1
+  let child1Counter = -1
+  let child2Counter = -1
+  let {state, actions} = twine((_state) => state = _state)({
+    state: {
+      x: 'not set',
+    },
+    computed (state) {
+      parentCounter ++
+      return {
+        count: parentCounter,
+      }
+    },
+    models: {
+      xchild1: {
+        state: {
+          x: 'bar',
+        },
+        computed () {
+          child1Counter ++
+          return {
+            count: child1Counter,
+          }
+        },
+        reducers: {
+          update () {
+            return {
+              x: 'bar updated',
+            }
+          },
+        },
+        models: {
+          xchild2: {
+            state: {
+              x: 'baz',
+            },
+            computed () {
+              child2Counter ++
+              return {
+                count: child2Counter,
+              }
+            },
+            reducers: {
+              update () {
+                return {
+                  x: 'baz updated',
+                }
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+  t.equal(state.count, 0, `Parent counter is 0 after first run`)
+  t.equal(state.xchild1.count, 0, `First child counter is 0 after first run`)
+  t.equal(state.xchild1.xchild2.count, 0, `Second child counter is 0 after first run`)
+
+  actions.xchild1.xchild2.update()
+  t.equal(state.count, 1, `Parent counter is 1 after second run`)
+  t.equal(state.xchild1.count, 1, `First child counter is 1 after second run`)
+  t.equal(state.xchild1.xchild2.count, 1, `Second child counter is 1 after second run`)
+
+  actions.xchild1.xchild2.update()
+  t.equal(state.count, 2, `Parent counter is 2 after third run`)
+  t.equal(state.xchild1.count, 2, `First child counter is 2 after third run`)
+  t.equal(state.xchild1.xchild2.count, 2, `Second child counter is 2 after third run`)
+
+  actions.xchild1.update()
+  t.equal(state.count, 3, `Parent counter is 3 after fourth run`)
+  t.equal(state.xchild1.count, 3, `First child counter is 3 after fourth run`)
+  t.equal(state.xchild1.xchild2.count, 2, `Second child counter remains at 2 after fourth run`)
 })

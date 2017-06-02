@@ -1,5 +1,5 @@
 import * as test from 'tape'
-import {updateStateAtPath, getNestedObjFromPath} from '../src/index'
+import {updateStateAtPath, getStateFromPath} from '../src/index'
 
 test('twine / utils / gets nested state given array of keys', function (t) {
   t.plan(1)
@@ -30,9 +30,9 @@ test('twine / utils / gets nested state given array of keys', function (t) {
       },
     },
   }
-  let firstLevel = getNestedObjFromPath(state, ['foo'])
-  let secondLevel = getNestedObjFromPath(state, ['bar'])
-  let thirdLevel = getNestedObjFromPath(state, ['bar', 'baz'])
+  let firstLevel = getStateFromPath(state, ['foo'])
+  let secondLevel = getStateFromPath(state, ['bar'])
+  let thirdLevel = getStateFromPath(state, ['bar', 'baz'])
   t.equal(firstLevel, 'foo')
   t.equal(secondLevel, state.bar)
   t.equal(thirdLevel, state.bar.baz)
