@@ -8,7 +8,7 @@ test('twine / reducers / receive state', function (t) {
       title: 'not set',
     },
     reducers: {
-      setTitle (state) {
+      setTitle(state) {
         t.equal(state.title, 'not set', 'reducer received state')
       },
     },
@@ -22,12 +22,12 @@ test('twine / reducers / receive latest state', function (t) {
       title: 'not set',
     },
     reducers: {
-      updateTitle (state, title) {
+      updateTitle(state, title) {
         return {
           title,
         }
       },
-      checkLatestState (state) {
+      checkLatestState(state) {
         t.equal(state.title, 'updated title', 'reducer received latest state')
         return state
       },
@@ -38,12 +38,12 @@ test('twine / reducers / receive latest state', function (t) {
           foo: 'not set',
         },
         reducers: {
-          updateFoo (state, foo) {
+          updateFoo(state, foo) {
             return {
               foo,
             }
           },
-          checkLatestState (state) {
+          checkLatestState(state) {
             t.equal(state.foo, 'updated foo', 'nested reducer received latest state')
             return state
           },
@@ -61,7 +61,7 @@ test('twine / reducers / receive multiple arguments', function (t) {
   const app = twine()({
     state: {},
     reducers: {
-      setTitle (state, title, other) {
+      setTitle(state, title, other) {
         t.equal(title, 'foo', 'first argument is okay')
         t.equal(other, 123, 'second argument is okay')
       },
@@ -74,11 +74,11 @@ test('twine / reducers / return from invocation', function (t) {
   const app = twine()({
     state: {},
     reducers: {
-      firstReducer (state, title) {
-        return {title}
+      firstReducer(state, title) {
+        return { title }
       },
-      secondReducer () {
-        return {title: 123}
+      secondReducer() {
+        return { title: 123 }
       },
     },
   })
@@ -96,8 +96,8 @@ test('twine / reducers / return global state', function (t) {
       foo: 'untouched',
     },
     reducers: {
-      firstReducer (state, title) {
-        return {title}
+      firstReducer(state, title) {
+        return { title }
       },
     },
     models: {
@@ -106,7 +106,7 @@ test('twine / reducers / return global state', function (t) {
           title: 'not set',
         },
         reducers: {
-          secondReducer (state, title) {
+          secondReducer(state, title) {
             return {
               title,
             }
@@ -163,7 +163,7 @@ test('twine / reducers / update state', function (t) {
     },
     reducers: {
       firstReducer (state, title) {
-        return {title}
+        return { title }
       },
     },
     models: {
@@ -324,7 +324,7 @@ test('twine / scoped / reducers receive local state', function (t) {
   app.actions.counter.anotherModel.update()
 })
 test('twine / scoped / reducers return local state', function (t) {
-  t.plan(2)
+  t.plan(3)
   const app = twine()({
     state: {
       title: 'not set',
@@ -338,7 +338,7 @@ test('twine / scoped / reducers return local state', function (t) {
         },
         reducers: {
           increment (localState) {
-            return {count: localState.count + 1}
+            return { count: localState.count + 1 }
           },
         },
         models: {
@@ -346,10 +346,11 @@ test('twine / scoped / reducers return local state', function (t) {
             scoped: true,
             state: {
               myState: 'hey',
+              myUnchangedState: 123,
             },
             reducers: {
               update (localState) {
-                return {myState: 'updated'}
+                return { myState: 'updated' }
               },
             },
           },
@@ -358,7 +359,8 @@ test('twine / scoped / reducers return local state', function (t) {
     },
   })
   const reducer1 = app.actions.counter.increment()
-  t.equal(reducer1.count, 2, 'second reducer returned local state')
+  t.equal(reducer1.count, 2, 'first reducer returned local state')
   const reducer2 = app.actions.counter.anotherModel.update()
   t.equal(reducer2.myState, 'updated', 'second reducer returned local state')
+  t.equal(reducer2.myUnchangedState, 123, 'second reducer returned local state including unchanged state')
 })

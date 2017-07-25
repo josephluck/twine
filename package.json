@@ -1,6 +1,6 @@
 {
   "name": "twine-js",
-  "version": "1.9.1",
+  "version": "1.9.2",
   "description": "Functional front-end state management",
   "main": "./lib/index.js",
   "files": [
@@ -8,8 +8,8 @@
     "lib/"
   ],
   "repository": {
-    "type" : "git",
-    "url" : "https://github.com/josephluck/twine"
+    "type": "git",
+    "url": "https://github.com/josephluck/twine"
   },
   "types": "./lib/index.d.ts",
   "scripts": {

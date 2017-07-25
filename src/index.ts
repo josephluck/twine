@@ -29,15 +29,15 @@ export interface State {
   [key: string]: State | any
 }
 
-function noop () {
+function noop() {
   return null
 }
 
-function arrayToObj (curr, prev) {
+function arrayToObj(curr, prev) {
   return Object.assign({}, curr, prev)
 }
 
-export function mergeState (model: Model) {
+export function mergeState(model: Model) {
   if (model.models) {
     let child = Object.keys(model.models).map(key => ({
       [key]: mergeState(model.models[key]),
@@ -52,11 +52,11 @@ export function mergeState (model: Model) {
   return Object.assign({}, localState, computedState)
 }
 
-export function createState (model: Model) {
+export function createState(model: Model) {
   return mergeState(model)
 }
 
-export function retrieveNestedModel (model: Model, path: string[], index: number = 0) {
+export function retrieveNestedModel(model: Model, path: string[], index: number = 0) {
   if (model.models) {
     let currModel = model.models[path[index]]
     if (currModel && currModel.models && currModel.models[path[index + 1]]) {
@@ -67,14 +67,14 @@ export function retrieveNestedModel (model: Model, path: string[], index: number
   return model
 }
 
-export function getStateFromPath (state: State, path: string[]) {
+export function getStateFromPath(state: State, path: string[]) {
   if (path.length) {
     return getStateFromPath(state[path[0]], path.slice(1))
   }
   return state
 }
 
-export function updateStateAtPath (state: State, path: string[], value: any) {
+export function updateStateAtPath(state: State, path: string[], value: any) {
   if (path.length > 0) {
     let key = path[0]
     if (path.length > 1) {
@@ -86,7 +86,7 @@ export function updateStateAtPath (state: State, path: string[], value: any) {
   return state
 }
 
-export function recursivelyUpdateComputedState (model: Model, state: State, path: string[]) {
+export function recursivelyUpdateComputedState(model: Model, state: State, path: string[]) {
   const currentModel = retrieveNestedModel(model, path)
   const currentState = getStateFromPath(state, path)
   const computedState = currentModel
@@ -108,7 +108,7 @@ export function recursivelyUpdateComputedState (model: Model, state: State, path
   }
 }
 
-export function onStateChange (plugins: Plugin[], state, prev, actions) {
+export function onStateChange(plugins: Plugin[], state, prev, actions) {
   return plugins.map(plugin => {
     if (typeof plugin === 'function') {
       plugin(state, prev, actions)
@@ -118,7 +118,7 @@ export function onStateChange (plugins: Plugin[], state, prev, actions) {
   })
 }
 
-export function onReducerCalled (plugins, state, prev, name, args) {
+export function onReducerCalled(plugins, state, prev, name, args) {
   return plugins.map(plugin => {
     if (typeof plugin === 'object' && plugin.onReducerCalled) {
       plugin.onReducerCalled.apply(null, [state, prev, name].concat(args))
@@ -126,7 +126,7 @@ export function onReducerCalled (plugins, state, prev, name, args) {
   })
 }
 
-export function onEffectCalled (plugins, prev, name, args) {
+export function onEffectCalled(plugins, prev, name, args) {
   return plugins.map(plugin => {
     if (typeof plugin === 'object' && plugin.onEffectCalled) {
       plugin.onEffectCalled.apply(null, [prev, name].concat(args))
@@ -134,7 +134,7 @@ export function onEffectCalled (plugins, prev, name, args) {
   })
 }
 
-export function wrapReducer (plugins, reducer) {
+export function wrapReducer(plugins, reducer) {
   return plugins.reduce((prev, plugin) => {
     if (typeof plugin === 'object' && plugin.wrapReducers) {
       return plugin.wrapReducers(prev)
@@ -144,7 +144,7 @@ export function wrapReducer (plugins, reducer) {
   }, reducer)
 }
 
-export function wrapEffect (plugins, effect) {
+export function wrapEffect(plugins, effect) {
   return plugins.reduce((prev, plugin) => {
     if (typeof plugin === 'object' && plugin.wrapEffects) {
       return plugin.wrapEffects(prev)
@@ -154,17 +154,17 @@ export function wrapEffect (plugins, effect) {
   }, effect)
 }
 
-export default function twine (opts?: Opts) {
+export default function twine(opts?: Opts) {
   if (!opts) {
     opts = noop
   }
   let plugins = typeof opts === 'object' && Array.isArray(opts) ? opts : [opts]
 
-  return function output (model: Model) {
+  return function output(model: Model) {
     let state = createState(model)
     let actions = createActions(model, [])
 
-    function decorateActions (reducers: Model['reducers'], effects: Model['effects'], path: string[]) {
+    function decorateActions(reducers: Model['reducers'], effects: Model['effects'], path: string[]) {
       const decoratedReducers = Object.keys(reducers || {}).map(key => {
         const reducer = reducers[key]
         const decoratedReducer = function () {
@@ -182,10 +182,12 @@ export default function twine (opts?: Opts) {
           const pluginArgs = Array.prototype.slice.call(arguments)
           onReducerCalled(plugins, state, previousState, reducer.name, pluginArgs)
           onStateChange(plugins, state, previousState, actions)
-          return path.length && currentModel.scoped ? reducerResponse : state
+          return path.length && currentModel.scoped
+            ? Object.assign({}, currentModelsState, reducerResponse)
+            : state
         }
         const wrappedReducer = wrapReducer(plugins, decoratedReducer)
-        Object.defineProperty(wrappedReducer, 'name', {value: reducer.name})
+        Object.defineProperty(wrappedReducer, 'name', { value: reducer.name })
         return { [key]: wrappedReducer }
       })
       const decoratedEffects = Object.keys(effects || {}).map(key => {
@@ -206,13 +208,13 @@ export default function twine (opts?: Opts) {
           return effects[key].apply(null, effectArgs)
         }
         const wrappedEffect = wrapEffect(plugins, decoratedEffect)
-        Object.defineProperty(wrappedEffect, 'name', {value: effect.name})
+        Object.defineProperty(wrappedEffect, 'name', { value: effect.name })
         return { [key]: wrappedEffect }
       })
       return decoratedReducers.concat(decoratedEffects).reduce(arrayToObj, {})
     }
 
-    function createActions (model: Model, path: string[]) {
+    function createActions(model: Model, path: string[]) {
       if (model.models) {
         const child = Object.keys(model.models).map(key => ({
           [key]: createActions(model.models[key], path.concat(key)),
