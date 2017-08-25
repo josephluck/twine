@@ -12,7 +12,7 @@ export type Opts = Plugin | Plugin[]
 
 export interface Model {
   state?: any
-  computed?: (state) => any
+  computed?: (state: any) => any
   scoped?: boolean
   reducers?: {
     [key: string]: (state: any, ...args: any[]) => any,
@@ -108,7 +108,7 @@ export function recursivelyUpdateComputedState(model: Model, state: State, path:
   }
 }
 
-export function onStateChange(plugins: Plugin[], state, prev, actions) {
+export function onStateChange (plugins: Plugin[], state, prev, actions) {
   return plugins.map(plugin => {
     if (typeof plugin === 'function') {
       plugin(state, prev, actions)
@@ -118,7 +118,7 @@ export function onStateChange(plugins: Plugin[], state, prev, actions) {
   })
 }
 
-export function onReducerCalled(plugins, state, prev, name, args) {
+export function onReducerCalled (plugins, state, prev, name, args) {
   return plugins.map(plugin => {
     if (typeof plugin === 'object' && plugin.onReducerCalled) {
       plugin.onReducerCalled.apply(null, [state, prev, name].concat(args))
@@ -126,7 +126,7 @@ export function onReducerCalled(plugins, state, prev, name, args) {
   })
 }
 
-export function onEffectCalled(plugins, prev, name, args) {
+export function onEffectCalled (plugins, prev, name, args) {
   return plugins.map(plugin => {
     if (typeof plugin === 'object' && plugin.onEffectCalled) {
       plugin.onEffectCalled.apply(null, [prev, name].concat(args))
@@ -134,7 +134,7 @@ export function onEffectCalled(plugins, prev, name, args) {
   })
 }
 
-export function wrapReducer(plugins, reducer) {
+export function wrapReducer (plugins, reducer) {
   return plugins.reduce((prev, plugin) => {
     if (typeof plugin === 'object' && plugin.wrapReducers) {
       return plugin.wrapReducers(prev)
@@ -144,7 +144,7 @@ export function wrapReducer(plugins, reducer) {
   }, reducer)
 }
 
-export function wrapEffect(plugins, effect) {
+export function wrapEffect (plugins, effect) {
   return plugins.reduce((prev, plugin) => {
     if (typeof plugin === 'object' && plugin.wrapEffects) {
       return plugin.wrapEffects(prev)
@@ -154,17 +154,17 @@ export function wrapEffect(plugins, effect) {
   }, effect)
 }
 
-export default function twine(opts?: Opts) {
+export default function twine (opts?: Opts) {
   if (!opts) {
     opts = noop
   }
   let plugins = typeof opts === 'object' && Array.isArray(opts) ? opts : [opts]
 
-  return function output(model: Model) {
+  return function output (model: Model) {
     let state = createState(model)
     let actions = createActions(model, [])
 
-    function decorateActions(reducers: Model['reducers'], effects: Model['effects'], path: string[]) {
+    function decorateActions (reducers: Model['reducers'], effects: Model['effects'], path: string[]) {
       const decoratedReducers = Object.keys(reducers || {}).map(key => {
         const reducer = reducers[key]
         const decoratedReducer = function () {
@@ -214,7 +214,7 @@ export default function twine(opts?: Opts) {
       return decoratedReducers.concat(decoratedEffects).reduce(arrayToObj, {})
     }
 
-    function createActions(model: Model, path: string[]) {
+    function createActions (model: Model, path: string[]) {
       if (model.models) {
         const child = Object.keys(model.models).map(key => ({
           [key]: createActions(model.models[key], path.concat(key)),
