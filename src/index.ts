@@ -1,4 +1,5 @@
 import * as Types from './types'
+import * as pluginUtils from './plugins'
 
 function noop() {
   return null
@@ -85,52 +86,6 @@ export function recursivelyUpdateComputedState(
   }
 }
 
-export function onStateChange(plugins: Types.Plugin[], state, prev, actions) {
-  return plugins.map(plugin => {
-    if (typeof plugin === 'function') {
-      plugin(state, prev, actions)
-    } else if (typeof plugin === 'object' && plugin.onStateChange) {
-      plugin.onStateChange(state, prev, actions)
-    }
-  })
-}
-
-export function onReducerCalled(plugins, state, prev, name, args) {
-  return plugins.map(plugin => {
-    if (typeof plugin === 'object' && plugin.onReducerCalled) {
-      plugin.onReducerCalled.apply(null, [state, prev, name].concat(args))
-    }
-  })
-}
-
-export function onEffectCalled(plugins, prev, name, args) {
-  return plugins.map(plugin => {
-    if (typeof plugin === 'object' && plugin.onEffectCalled) {
-      plugin.onEffectCalled.apply(null, [prev, name].concat(args))
-    }
-  })
-}
-
-export function wrapReducer(plugins, reducer) {
-  return plugins.reduce((prev, plugin) => {
-    if (typeof plugin === 'object' && plugin.wrapReducers) {
-      return plugin.wrapReducers(prev)
-    } else {
-      return prev
-    }
-  }, reducer)
-}
-
-export function wrapEffect(plugins, effect) {
-  return plugins.reduce((prev, plugin) => {
-    if (typeof plugin === 'object' && plugin.wrapEffects) {
-      return plugin.wrapEffects(prev)
-    } else {
-      return prev
-    }
-  }, effect)
-}
-
 export default function twine(model: Types.Model, opts?: Types.Opts) {
   if (!opts) {
     opts = noop
@@ -159,13 +114,13 @@ export default function twine(model: Types.Model, opts?: Types.Opts) {
 
         // Plugins
         const pluginArgs = Array.prototype.slice.call(arguments)
-        onReducerCalled(plugins, state, previousState, reducer.name, pluginArgs)
-        onStateChange(plugins, state, previousState, actions)
+        pluginUtils.onReducerCalled(plugins, state, previousState, reducer.name, pluginArgs)
+        pluginUtils.onStateChange(plugins, state, previousState, actions)
         return path.length && currentModel.scoped
           ? Object.assign({}, currentModelsState, reducerResponse)
           : state
       }
-      const wrappedReducer = wrapReducer(plugins, decoratedReducer)
+      const wrappedReducer = pluginUtils.wrapReducer(plugins, decoratedReducer)
       Object.defineProperty(wrappedReducer, 'name', { value: reducer.name })
       return { [key]: wrappedReducer }
     })
@@ -178,15 +133,15 @@ export default function twine(model: Types.Model, opts?: Types.Opts) {
           const effectActions = nestedModel.scoped ? getStateFromPath(actions, path) : actions
           const args = Array.prototype.slice.call(arguments)
           const effectArgs = [effectState, effectActions].concat(args)
-          onEffectCalled(plugins, state, effect.name, args)
+          pluginUtils.onEffectCalled(plugins, state, effect.name, args)
           return effects[key].apply(null, effectArgs)
         }
         const args = Array.prototype.slice.call(arguments)
         const effectArgs = [state, actions].concat(args)
-        onEffectCalled(plugins, state, effect.name, args)
+        pluginUtils.onEffectCalled(plugins, state, effect.name, args)
         return effects[key].apply(null, effectArgs)
       }
-      const wrappedEffect = wrapEffect(plugins, decoratedEffect)
+      const wrappedEffect = pluginUtils.wrapEffect(plugins, decoratedEffect)
       Object.defineProperty(wrappedEffect, 'name', { value: effect.name })
       return { [key]: wrappedEffect }
     })
