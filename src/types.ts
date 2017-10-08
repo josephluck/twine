@@ -12,21 +12,32 @@ export type Plugin =
 
 export type Opts = Plugin | Plugin[]
 
-export interface Model {
-  state?: any
-  computed?: (state: any) => any
+export type Reducer<S> = (params: { state: S }) => Partial<S>
+export type Effect<S, A> = (params: { state: S; actions: A }) => any
+
+export interface ModelImpl<
+  S,
+  R extends Record<string, Reducer<S>>,
+  E extends Record<string, Effect<any, any>>
+> {
   scoped?: boolean
-  reducers?: {
-    [key: string]: (state: any, ...args: any[]) => any
-  }
-  effects?: {
-    [key: string]: (state: any, actions: any, ...args: any[]) => any
-  }
+  state?: any
+  computed?: (state: S) => Partial<S>
+  reducers?: R
+  effects?: E
   models?: {
-    [key: string]: Model
+    [key: string]: ModelImpl<any, any, any>
   }
 }
 
 export interface State {
   [key: string]: State | any
+}
+
+export type Subscribe<S, A> = (state: S, prev: S, actions: A) => () => any
+
+export interface Return<S, A> {
+  actions: A
+  state: A
+  subscribe: Subscribe<S, A>
 }

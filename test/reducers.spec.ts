@@ -3,7 +3,7 @@ import twine from '../src/index'
 
 test('twine / reducers / receive state', function(t) {
   t.plan(1)
-  const app = twine({
+  const app = twine<any, any>({
     state: {
       title: 'not set',
     },
@@ -17,7 +17,7 @@ test('twine / reducers / receive state', function(t) {
 })
 test('twine / reducers / receive latest state', function(t) {
   t.plan(2)
-  const app = twine({
+  const app = twine<any, any>({
     state: {
       title: 'not set',
     },
@@ -58,7 +58,7 @@ test('twine / reducers / receive latest state', function(t) {
 })
 test('twine / reducers / receive multiple params', function(t) {
   t.plan(2)
-  const app = twine({
+  const app = twine<any, any>({
     state: {},
     reducers: {
       setTitle({ state, title, other }) {
@@ -71,7 +71,7 @@ test('twine / reducers / receive multiple params', function(t) {
 })
 test('twine / reducers / return from invocation', function(t) {
   t.plan(2)
-  const app = twine({
+  const app = twine<any, any>({
     state: {},
     reducers: {
       firstReducer({ state, title }) {
@@ -90,7 +90,7 @@ test('twine / reducers / return from invocation', function(t) {
 test('twine / reducers / return global state', function(t) {
   t.plan(13)
   let state
-  const app = twine(
+  const app = twine<any, any>(
     {
       state: {
         title: 'not set',
@@ -171,7 +171,7 @@ test('twine / reducers / return global state', function(t) {
 test('twine / reducers / update state', function(t) {
   t.plan(12)
   let state
-  const app = twine(
+  const app = twine<any, any>(
     {
       state: {
         title: 'not set',
@@ -224,7 +224,7 @@ test('twine / scoped / reducers update local state effecting global state', func
     t.equal(state.foo.bar, 'baz', 'foo bar remains unchanged')
     t.equal(state.counter.anotherModel.myState, 'updated', 'state updated')
   }
-  const appOne = twine(
+  const appOne = twine<any, any>(
     {
       state: {
         title: 'not set',
@@ -270,7 +270,7 @@ test('twine / scoped / reducers update local state effecting global state', func
     t.equal(state.foo.bar, 'baz', 'foo bar remains unchanged')
     t.equal(state.counter.anotherModel.myState, 'hey', 'state remains unchanged')
   }
-  const appTwo = twine(
+  const appTwo = twine<any, any>(
     {
       state: {
         title: 'not set',
@@ -312,7 +312,7 @@ test('twine / scoped / reducers update local state effecting global state', func
 })
 test('twine / scoped / reducers receive local state', function(t) {
   t.plan(2)
-  const app = twine({
+  const app = twine<any, any>({
     state: {
       title: 'not set',
     },
@@ -349,7 +349,7 @@ test('twine / scoped / reducers receive local state', function(t) {
 })
 test('twine / scoped / reducers return local state', function(t) {
   t.plan(3)
-  const app = twine({
+  const app = twine<any, any>({
     state: {
       title: 'not set',
     },

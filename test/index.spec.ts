@@ -2,9 +2,9 @@ import * as test from 'tape'
 import twine from '../src/index'
 
 // app examples
-test('twine / app / example 1', function (t) {
+test('twine / app / example 1', function(t) {
   t.plan(3)
-  const subscription = function (state) {
+  const subscription = function(state) {
     t.equal(state.title, 'bar')
   }
   const model = {
@@ -12,33 +12,33 @@ test('twine / app / example 1', function (t) {
       title: 'foo',
     },
     reducers: {
-      update ({state, title}) {
+      update({ state, title }) {
         return {
           title: title,
         }
       },
     },
     effects: {
-      async (state, actions, timeout) {
-        setTimeout(function () {
+      async({ state, actions, timeout }) {
+        setTimeout(function() {
           t.equal(typeof actions.update, 'function', 'effect called and received actions')
           t.equal(state.title, 'bar', 'effect called and received latest state')
         }, timeout)
       },
     },
   }
-  const app = twine(model, subscription)
-  app.actions.update({title: 'bar'})
-  app.actions.async(1)
+  const app = twine<any, any>(model, subscription)
+  app.actions.update({ title: 'bar' })
+  app.actions.async({ timeout: 1 })
 })
-test('twine / app / example 2', function (t) {
+test('twine / app / example 2', function(t) {
   t.plan(6)
-  const app = twine({
+  const app = twine<any, any>({
     state: {
       foo: 'foo',
     },
     reducers: {
-      foo: function () {
+      foo() {
         t.pass('level one reducer called')
       },
     },
@@ -48,7 +48,7 @@ test('twine / app / example 2', function (t) {
           foo: 'bar',
         },
         reducers: {
-          foo: function () {
+          foo() {
             t.pass('level two reducer called')
           },
         },
@@ -58,7 +58,7 @@ test('twine / app / example 2', function (t) {
               foo: 'baz',
             },
             reducers: {
-              foo: function () {
+              foo() {
                 t.pass('level three reducer called')
               },
             },
@@ -74,7 +74,7 @@ test('twine / app / example 2', function (t) {
   t.equal(app.state.levelTwo.foo, 'bar', 'level two state is correct')
   t.equal(app.state.levelTwo.levelThree.foo, 'baz', 'level three state is correct')
 })
-test('twine / app / example 3', function (t) {
+test('twine / app / example 3', function(t) {
   t.plan(6)
   const model = {
     state: {},
@@ -95,7 +95,7 @@ test('twine / app / example 3', function (t) {
               password: 'password',
             },
             reducers: {
-              setFormField ({state, key, value}) {
+              setFormField({ state, key, value }) {
                 return {
                   ...state,
                   [key]: value,
@@ -103,8 +103,8 @@ test('twine / app / example 3', function (t) {
               },
             },
             effects: {
-              updateFormField (state, actions, key, value) {
-                return actions.setFormField({key, value})
+              updateFormField({ state, actions, key, value }) {
+                return actions.setFormField({ key, value })
               },
             },
           },
@@ -113,26 +113,28 @@ test('twine / app / example 3', function (t) {
     },
   }
   let _state
-  const app = twine(model, (state) => _state = state)
+  const app = twine<any, any>(model, state => (_state = state))
 
-  app.actions.pages.login.setFormField({key: 'username', value: 'joseph@example.comm'})
+  app.actions.pages.login.setFormField({ key: 'username', value: 'joseph@example.comm' })
   t.equal(_state.pages.login.username, 'joseph@example.comm')
   t.equal(_state.pages.login.password, 'password')
-  app.actions.pages.login.updateFormField('username', 'joseph@example.commm')
+  app.actions.pages.login.updateFormField({ key: 'username', value: 'joseph@example.commm' })
   t.equal(_state.pages.login.username, 'joseph@example.commm')
   t.equal(_state.pages.login.password, 'password')
-  app.actions.pages.login.setFormField({key: 'username', value: 'chloe@example.co.uk'})
+  app.actions.pages.login.setFormField({ key: 'username', value: 'chloe@example.co.uk' })
   t.equal(_state.pages.login.username, 'chloe@example.co.uk')
   t.equal(_state.pages.login.password, 'password')
 })
 
 // Return of twine setup
-test('twine / return / actions contain reducers', function (t) {
+test('twine / return / actions contain reducers', function(t) {
   t.plan(2)
-  const app = twine({
+  const app = twine<any, any>({
     state: {},
     reducers: {
-      myReducer () { return null },
+      myReducer() {
+        return null
+      },
     },
   })
   t.equal(typeof app.actions, 'object', 'actions is an object')
@@ -140,4 +142,4 @@ test('twine / return / actions contain reducers', function (t) {
 })
 test.skip('skip / twine / return / state is available')
 
-test.skip('skip / twine / scoped / hooks still work as expected with global state', function (t) {})
+test.skip('skip / twine / scoped / hooks still work as expected with global state', function(t) {})

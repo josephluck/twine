@@ -2,9 +2,9 @@ import * as test from 'tape'
 import twine from '../src/index'
 const noop = () => null
 
-test('twine / composition / composition merges state together', function (t) {
+test('twine / composition / composition merges state together', function(t) {
   t.plan(2)
-  const app = twine({
+  const app = twine<any, any>({
     state: {
       foo: 'foo',
     },
@@ -23,9 +23,9 @@ test('twine / composition / composition merges state together', function (t) {
     t.fail('child state has not been merged')
   }
 })
-test('twine / composition / composition works with actions', function (t) {
+test('twine / composition / composition works with actions', function(t) {
   t.plan(2)
-  const app = twine({
+  const app = twine<any, any>({
     state: {},
     reducers: {
       foo: noop,
@@ -46,14 +46,14 @@ test('twine / composition / composition works with actions', function (t) {
     t.fail('child method has not been merged')
   }
 })
-test('twine / composition / reducers receive state', function (t) {
+test('twine / composition / reducers receive state', function(t) {
   t.plan(2)
-  const app = twine({
+  const app = twine<any, any>({
     state: {
       foo: 'foo',
     },
     reducers: {
-      foo ({state}) {
+      foo({ state }) {
         t.equal(state.foo, 'foo', 'parent reducer received state')
         return state
       },
@@ -64,7 +64,7 @@ test('twine / composition / reducers receive state', function (t) {
           baz: 'baz',
         },
         reducers: {
-          baz ({state}) {
+          baz({ state }) {
             t.equal(state.baz, 'baz', 'child reducer received state')
             return state
           },
@@ -75,14 +75,14 @@ test('twine / composition / reducers receive state', function (t) {
   app.actions.foo()
   app.actions.bar.baz()
 })
-test('twine / composition / effects receive state', function (t) {
+test('twine / composition / effects receive state', function(t) {
   t.plan(4)
-  const app = twine({
+  const app = twine<any, any>({
     state: {
       foo: 'foo',
     },
     effects: {
-      foo (state) {
+      foo({ state }) {
         t.equal(state.foo, 'foo', 'parent effect received state')
         t.equal(state.bar.baz, 'baz', 'parent effect can access child state')
       },
@@ -93,7 +93,7 @@ test('twine / composition / effects receive state', function (t) {
           baz: 'baz',
         },
         effects: {
-          baz (state) {
+          baz({ state }) {
             t.equal(state.bar.baz, 'baz', 'child effect received state')
             t.equal(state.foo, 'foo', 'child effect cannot access parent state')
           },
@@ -104,9 +104,9 @@ test('twine / composition / effects receive state', function (t) {
   app.actions.foo()
   app.actions.bar.baz()
 })
-test('twine / composition / effects receive child actions', function (t) {
+test('twine / composition / effects receive child actions', function(t) {
   t.plan(8)
-  const app = twine({
+  const app = twine<any, any>({
     state: {
       foo: 'foo',
     },
@@ -114,7 +114,7 @@ test('twine / composition / effects receive child actions', function (t) {
       qaz: noop,
     },
     effects: {
-      foo (state, actions) {
+      foo({ state, actions }) {
         t.equal(typeof actions.foo, 'function', 'parent effect can call parent effect')
         t.equal(typeof actions.qaz, 'function', 'parent effect can call parent reducer')
         t.equal(typeof actions.bar.baz, 'function', 'parent effect can call child effect')
@@ -130,7 +130,7 @@ test('twine / composition / effects receive child actions', function (t) {
           quuz: noop,
         },
         effects: {
-          baz (state, actions) {
+          baz({ state, actions }) {
             t.equal(typeof actions.foo, 'function', 'child effect can call parent effect')
             t.equal(typeof actions.qaz, 'function', 'child effect can call parent reducer')
             t.equal(typeof actions.bar.baz, 'function', 'child effect can call child effect')
