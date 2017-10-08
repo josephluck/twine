@@ -23,7 +23,7 @@ test('twine / effects / receive latest state', function (t) {
       title: 'not set',
     },
     reducers: {
-      updateTitle (state, title) {
+      updateTitle ({state, title}) {
         return {
           title: title,
         }
@@ -35,7 +35,7 @@ test('twine / effects / receive latest state', function (t) {
       },
     },
   })
-  app.actions.updateTitle('updated title')
+  app.actions.updateTitle({title: 'updated title'})
   app.actions.checkLatestState()
 })
 test('twine / effects / unscoped effects receive global state', function (t) {
@@ -45,7 +45,7 @@ test('twine / effects / unscoped effects receive global state', function (t) {
       title: 'not set',
     },
     reducers: {
-      updateTitle (state, title) {
+      updateTitle ({state, title}) {
         return {
           title: title,
         }
@@ -62,7 +62,7 @@ test('twine / effects / unscoped effects receive global state', function (t) {
       },
     },
   })
-  app.actions.updateTitle('updated title')
+  app.actions.updateTitle({title: 'updated title'})
   app.actions.unscopedModel.checkLatestState()
 })
 test('twine / effects / unscoped effects receive global actions', function (t) {
@@ -72,7 +72,7 @@ test('twine / effects / unscoped effects receive global actions', function (t) {
       title: 'not set',
     },
     reducers: {
-      updateTitle (state, title) {
+      updateTitle ({state, title}) {
         return {
           title: title,
         }
@@ -225,7 +225,7 @@ test('twine / scoped / effects receive latest local state', function (t) {
           title: 'not set',
         },
         reducers: {
-          updateTitle (state, title) {
+          updateTitle ({state, title}) {
             return {
               title: title,
             }
@@ -239,7 +239,7 @@ test('twine / scoped / effects receive latest local state', function (t) {
       },
     },
   })
-  app.actions.scopedModel.updateTitle('updated title')
+  app.actions.scopedModel.updateTitle({title: 'updated title'})
   app.actions.scopedModel.checkLatestState()
 })
 test.skip('skip / twine / scoped / effects receive local actions that update global state', function (t) {})

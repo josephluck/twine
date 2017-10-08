@@ -53,7 +53,7 @@ test('twine / composition / reducers receive state', function (t) {
       foo: 'foo',
     },
     reducers: {
-      foo (state) {
+      foo ({state}) {
         t.equal(state.foo, 'foo', 'parent reducer received state')
         return state
       },
@@ -64,7 +64,7 @@ test('twine / composition / reducers receive state', function (t) {
           baz: 'baz',
         },
         reducers: {
-          baz (state) {
+          baz ({state}) {
             t.equal(state.baz, 'baz', 'child reducer received state')
             return state
           },

@@ -92,11 +92,11 @@ test('twine / plugins / accepts an array of plugin objects', function (t) {
 test('twine / plugins / onReducerCalled plugin', function (t) {
   t.plan(5)
   const plugins = {
-    onReducerCalled (state, prev, name, ...args) {
+    onReducerCalled (state, prev, name, args) {
       t.pass('onReducerCalled called on reducer call')
       t.equal(prev.title, 'not set', 'onReducerCalled plugin received correct prev state')
       t.equal(state.title, 'set', 'onReducerCalled plugin received correct new state')
-      t.equal(args[0], 'set', 'onReducerCalled plugin received correct arguments')
+      t.equal(args.title, 'set', 'onReducerCalled plugin received correct arguments')
       t.equal(name, 'setTitle', 'onReducerCalled plugin received correct reducer name')
     },
   }
@@ -105,7 +105,7 @@ test('twine / plugins / onReducerCalled plugin', function (t) {
       title: 'not set',
     },
     reducers: {
-      setTitle (state, title) {
+      setTitle ({state, title}) {
         return {
           title: title,
         }
@@ -117,7 +117,7 @@ test('twine / plugins / onReducerCalled plugin', function (t) {
       },
     },
   }, plugins)
-  app.actions.setTitle('set')
+  app.actions.setTitle({title: 'set'})
   app.actions.setTitleAsync('set again')
 })
 
@@ -136,7 +136,7 @@ test('twine / plugins / onEffectCalled plugin', function (t) {
       title: 'not set',
     },
     reducers: {
-      setTitle (state, title) {
+      setTitle ({state, title}) {
         return {
           title: title,
         }
@@ -148,7 +148,7 @@ test('twine / plugins / onEffectCalled plugin', function (t) {
       },
     },
   }, plugins)
-  app.actions.setTitle('set')
+  app.actions.setTitle({title: 'set'})
   app.actions.setTitleAsync('set again')
 })
 
@@ -166,7 +166,7 @@ test('twine / plugins / onStateChange plugin', function (t) {
       title: 'not set',
     },
     reducers: {
-      setTitle (state, title) {
+      setTitle ({state, title}) {
         return {
           title: title,
         }
@@ -178,7 +178,7 @@ test('twine / plugins / onStateChange plugin', function (t) {
       },
     },
   }, plugins)
-  app.actions.setTitle('set')
+  app.actions.setTitle({title: 'set'})
   app.actions.setTitleAsync('set again')
 })
 
@@ -187,9 +187,9 @@ test('twine / plugins / wrapReducers plugin', function (t) {
   const plugins = {
     wrapReducers (reducer) {
       t.pass('wrap reducers called with reducer')
-      return function () {
+      return function (params) {
         t.pass('wrapped reducer called')
-        return reducer.apply(null, Array.prototype.slice.call(arguments).concat(123))
+        return reducer(Object.assign({abc: 123}, params, {}))
       }
     },
   }
@@ -198,7 +198,7 @@ test('twine / plugins / wrapReducers plugin', function (t) {
       title: 'not set',
     },
     reducers: {
-      setTitle (state, title, abc) {
+      setTitle ({state, title, abc}) {
         t.pass('wrapped reducer calls original reducer')
         t.equal(title, 'set', 'original reducer received correct input argument')
         t.equal(abc, 123, 'original reducer received additional argument from plugin')
@@ -208,7 +208,7 @@ test('twine / plugins / wrapReducers plugin', function (t) {
       },
     },
   }, plugins)
-  app.actions.setTitle('set')
+  app.actions.setTitle({title: 'set'})
 })
 
 test('twine / plugins / wrapEffects plugin', function (t) {

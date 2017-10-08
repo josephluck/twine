@@ -12,7 +12,7 @@ test('twine / app / example 1', function (t) {
       title: 'foo',
     },
     reducers: {
-      update (state, title) {
+      update ({state, title}) {
         return {
           title: title,
         }
@@ -28,7 +28,7 @@ test('twine / app / example 1', function (t) {
     },
   }
   const app = twine(model, subscription)
-  app.actions.update('bar')
+  app.actions.update({title: 'bar'})
   app.actions.async(1)
 })
 test('twine / app / example 2', function (t) {
@@ -95,7 +95,7 @@ test('twine / app / example 3', function (t) {
               password: 'password',
             },
             reducers: {
-              setFormField (state, key, value) {
+              setFormField ({state, key, value}) {
                 return {
                   ...state,
                   [key]: value,
@@ -104,7 +104,7 @@ test('twine / app / example 3', function (t) {
             },
             effects: {
               updateFormField (state, actions, key, value) {
-                return actions.setFormField(key, value)
+                return actions.setFormField({key, value})
               },
             },
           },
@@ -115,13 +115,13 @@ test('twine / app / example 3', function (t) {
   let _state
   const app = twine(model, (state) => _state = state)
 
-  app.actions.pages.login.setFormField('username', 'joseph@example.comm')
+  app.actions.pages.login.setFormField({key: 'username', value: 'joseph@example.comm'})
   t.equal(_state.pages.login.username, 'joseph@example.comm')
   t.equal(_state.pages.login.password, 'password')
   app.actions.pages.login.updateFormField('username', 'joseph@example.commm')
   t.equal(_state.pages.login.username, 'joseph@example.commm')
   t.equal(_state.pages.login.password, 'password')
-  app.actions.pages.login.setFormField('username', 'chloe@example.co.uk')
+  app.actions.pages.login.setFormField({key: 'username', value: 'chloe@example.co.uk'})
   t.equal(_state.pages.login.username, 'chloe@example.co.uk')
   t.equal(_state.pages.login.password, 'password')
 })

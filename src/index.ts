@@ -17,13 +17,12 @@ export default function twine(model: Types.Model, opts?: Types.Opts) {
   ) {
     const decoratedReducers = Object.keys(reducers || {}).map(key => {
       const reducer = reducers[key]
-      const decoratedReducer = function() {
+      const decoratedReducer = function(params = {}) {
         // Call reducer & update the global state
         const currentModel = utils.retrieveNestedModel(model, path) || model
         const previousState = Object.assign({}, state)
         const currentModelsState = path.length ? utils.getStateFromPath(state, path) : previousState
-        const reducerArgs = [currentModelsState].concat(Array.prototype.slice.call(arguments))
-        const reducerResponse = reducer.apply(null, reducerArgs)
+        const reducerResponse = reducer(Object.assign({state: currentModelsState}, params, {}))
         const newState = Object.assign({}, currentModelsState, reducerResponse)
         state = path.length ? utils.updateStateAtPath(state, path, newState) : newState
         state = utils.recursivelyUpdateComputedState(model, state, path)
