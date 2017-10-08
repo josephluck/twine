@@ -3,7 +3,7 @@ import twine from '../src/index'
 
 test('twine / computed / computed state called on instantiation', function (t) {
   t.plan(3)
-  let {state} = twine((_state) => state = _state)({
+  let {state} = twine({
     state: {
       title: 'not set',
     },
@@ -13,14 +13,14 @@ test('twine / computed / computed state called on instantiation', function (t) {
         foo: 'foo',
       }
     },
-  })
+  }, (_state) => state = _state)
   t.equal(state.title, 'not set', 'title is correct on instantiation from state object')
   t.equal(state.foo, 'foo', 'foo is correct on instantiation from computed function')
 })
 
 test('twine / computed / computed state in nested models are called on instantiation', function (t) {
   t.plan(6)
-  let {state} = twine((_state) => state = _state)({
+  let {state} = twine({
     state: {
       title: 'not set',
     },
@@ -43,7 +43,7 @@ test('twine / computed / computed state in nested models are called on instantia
         },
       },
     },
-  })
+  }, (_state) => state = _state)
   t.equal(state.title, 'not set', 'title is correct on instantiation from state object')
   t.equal(state.foo, 'foo', 'foo is correct on instantiation from computed function')
   t.equal(state.anotherModel.abc, 123, 'nested model state is correct from state object')
@@ -53,7 +53,7 @@ test('twine / computed / computed state in nested models are called on instantia
 test('twine / computed / computed state receives state', function (t) {
   t.plan(1)
   let state
-  twine((_state) => state = _state)({
+  twine({
     state: {
       title: 'not set',
     },
@@ -63,13 +63,13 @@ test('twine / computed / computed state receives state', function (t) {
         foo: 'foo',
       }
     },
-  })
+  }, (_state) => state = _state)
 })
 
 test('twine / computed / computed state receives state with nested models state', function (t) {
   t.plan(2)
   let state
-  twine((_state) => state = _state)({
+  twine({
     state: {
       title: 'not set',
     },
@@ -92,12 +92,12 @@ test('twine / computed / computed state receives state with nested models state'
         },
       },
     },
-  })
+  }, (_state) => state = _state)
 })
 
 test('twine / computed / computed state effects global state', function (t) {
   t.plan(2)
-  let {state} = twine((_state) => state = _state)({
+  let {state} = twine({
     state: {
       title: 'not set',
     },
@@ -106,7 +106,7 @@ test('twine / computed / computed state effects global state', function (t) {
         foo: 'foo',
       }
     },
-  })
+  }, (_state) => state = _state)
   t.equal(state.title, 'not set', 'local state is correct')
   t.equal(state.foo, 'foo', 'computed state is correct')
 })
@@ -114,7 +114,7 @@ test('twine / computed / computed state effects global state', function (t) {
 test('twine / computed / computed state called on state updates', function (t) {
   t.plan(2)
   let state
-  const app = twine((_state) => state = _state)({
+  const app = twine({
     state: {
       title: 'not set',
     },
@@ -131,13 +131,13 @@ test('twine / computed / computed state called on state updates', function (t) {
         }
       },
     },
-  })
+  }, (_state) => state = _state)
   app.actions.update()
 })
 
 test('twine / computed / computed state receives child models state on state updates', function (t) {
   t.plan(7)
-  let {state, actions} = twine((_state) => state = _state)({
+  let {state, actions} = twine({
     state: {
       title: 'not set',
     },
@@ -169,14 +169,14 @@ test('twine / computed / computed state receives child models state on state upd
         },
       },
     },
-  })
+  }, (_state) => state = _state)
   t.equal(state.anotherModel.def, 246, 'computed state in child model is correct')
   actions.update()
 })
 
 test('twine / computed / reducers receive state including computed state', function (t) {
   t.plan(4)
-  let {state, actions} = twine((_state) => state = _state)({
+  let {state, actions} = twine({
     state: {
       title: 'not set',
     },
@@ -195,13 +195,13 @@ test('twine / computed / reducers receive state including computed state', funct
         }
       },
     },
-  })
+  }, (_state) => state = _state)
   actions.update()
 })
 
 test('twine / computed / effects receive state including computed state', function (t) {
   t.plan(2)
-  let {state, actions} = twine((_state) => state = _state)({
+  let {state, actions} = twine({
     state: {
       title: 'not set',
     },
@@ -216,7 +216,7 @@ test('twine / computed / effects receive state including computed state', functi
         t.equal(state.foo, 'foo', 'effect received computed state')
       },
     },
-  })
+  }, (_state) => state = _state)
   actions.update()
 })
 
@@ -225,7 +225,7 @@ test('twine / computed / computed functions in parent models trigger when child 
   let parentCounter = -1
   let child1Counter = -1
   let child2Counter = -1
-  let {state, actions} = twine((_state) => state = _state)({
+  let {state, actions} = twine({
     state: {
       x: 'not set',
     },
@@ -275,7 +275,7 @@ test('twine / computed / computed functions in parent models trigger when child 
         },
       },
     },
-  })
+  }, (_state) => state = _state)
   t.equal(state.count, 0, `Parent counter is 0 after first run`)
   t.equal(state.xchild1.count, 0, `First child counter is 0 after first run`)
   t.equal(state.xchild1.xchild2.count, 0, `Second child counter is 0 after first run`)

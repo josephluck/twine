@@ -6,7 +6,7 @@ test('twine / plugins / accepts a single function plugin', function (t) {
   const plugins = (state, prev) => {
     t.pass('plugin called on state change')
   }
-  const app = twine(plugins)({
+  const app = twine({
     state: {
       title: 'not set',
     },
@@ -17,7 +17,7 @@ test('twine / plugins / accepts a single function plugin', function (t) {
         }
       },
     },
-  })
+  }, plugins)
   app.actions.setTitle('set')
 })
 
@@ -34,7 +34,7 @@ test('twine / plugins / accepts a plugin object', function (t) {
       t.pass('plugin called on state change')
     },
   }
-  const app = twine(plugins)({
+  const app = twine({
     state: {
       title: 'not set',
     },
@@ -50,7 +50,7 @@ test('twine / plugins / accepts a plugin object', function (t) {
         return null
       },
     },
-  })
+  }, plugins)
   app.actions.setTitle('set')
   app.actions.setTitleAsync('set again')
 })
@@ -68,7 +68,7 @@ test('twine / plugins / accepts an array of plugin objects', function (t) {
       t.pass('plugin called on state change')
     },
   }
-  const app = twine([plugins, plugins])({
+  const app = twine({
     state: {
       title: 'not set',
     },
@@ -84,7 +84,7 @@ test('twine / plugins / accepts an array of plugin objects', function (t) {
         return null
       },
     },
-  })
+  }, [plugins, plugins])
   app.actions.setTitle('set')
   app.actions.setTitleAsync('set again')
 })
@@ -100,7 +100,7 @@ test('twine / plugins / onReducerCalled plugin', function (t) {
       t.equal(name, 'setTitle', 'onReducerCalled plugin received correct reducer name')
     },
   }
-  const app = twine(plugins)({
+  const app = twine({
     state: {
       title: 'not set',
     },
@@ -116,7 +116,7 @@ test('twine / plugins / onReducerCalled plugin', function (t) {
         return null
       },
     },
-  })
+  }, plugins)
   app.actions.setTitle('set')
   app.actions.setTitleAsync('set again')
 })
@@ -131,7 +131,7 @@ test('twine / plugins / onEffectCalled plugin', function (t) {
       t.equal(name, 'setTitleAsync', 'onEffectCalled plugin received correct effect name')
     },
   }
-  const app = twine(plugins)({
+  const app = twine({
     state: {
       title: 'not set',
     },
@@ -147,7 +147,7 @@ test('twine / plugins / onEffectCalled plugin', function (t) {
         return null
       },
     },
-  })
+  }, plugins)
   app.actions.setTitle('set')
   app.actions.setTitleAsync('set again')
 })
@@ -161,7 +161,7 @@ test('twine / plugins / onStateChange plugin', function (t) {
       t.equal(state.title, 'set', 'onStateChange plugin received correct new state')
     },
   }
-  const app = twine(plugins)({
+  const app = twine({
     state: {
       title: 'not set',
     },
@@ -177,7 +177,7 @@ test('twine / plugins / onStateChange plugin', function (t) {
         return null
       },
     },
-  })
+  }, plugins)
   app.actions.setTitle('set')
   app.actions.setTitleAsync('set again')
 })
@@ -193,7 +193,7 @@ test('twine / plugins / wrapReducers plugin', function (t) {
       }
     },
   }
-  const app = twine(plugins)({
+  const app = twine({
     state: {
       title: 'not set',
     },
@@ -207,7 +207,7 @@ test('twine / plugins / wrapReducers plugin', function (t) {
         }
       },
     },
-  })
+  }, plugins)
   app.actions.setTitle('set')
 })
 
@@ -221,7 +221,7 @@ test('twine / plugins / wrapEffects plugin', function (t) {
       }
     },
   }
-  const app = twine(plugins)({
+  const app = twine({
     state: {
       title: 'not set',
     },
@@ -233,7 +233,7 @@ test('twine / plugins / wrapEffects plugin', function (t) {
         return null
       },
     },
-  })
+  }, plugins)
   app.actions.setTitleAsync('set')
 })
 
@@ -251,7 +251,7 @@ test('twine / plugins / wrapped effects and reducers retain their function names
       }
     },
   }
-  const app = twine(plugins)({
+  const app = twine({
     state: {
       title: 'not set',
     },
@@ -265,7 +265,7 @@ test('twine / plugins / wrapped effects and reducers retain their function names
         return null
       },
     },
-  })
+  }, plugins)
   t.equal(app.actions.setTitle.name, 'setTitle', 'reducer retained its function name')
   t.equal(app.actions.setTitleAsync.name, 'setTitleAsync', 'effect retained its function name')
 })

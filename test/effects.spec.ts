@@ -4,7 +4,7 @@ const noop = () => null
 
 test('twine / effects / receive state', function (t) {
   t.plan(1)
-  const app = twine()({
+  const app = twine({
     state: {
       title: 'not set',
     },
@@ -18,7 +18,7 @@ test('twine / effects / receive state', function (t) {
 })
 test('twine / effects / receive latest state', function (t) {
   t.plan(1)
-  const app = twine()({
+  const app = twine({
     state: {
       title: 'not set',
     },
@@ -40,7 +40,7 @@ test('twine / effects / receive latest state', function (t) {
 })
 test('twine / effects / unscoped effects receive global state', function (t) {
   t.plan(1)
-  const app = twine()({
+  const app = twine({
     state: {
       title: 'not set',
     },
@@ -67,7 +67,7 @@ test('twine / effects / unscoped effects receive global state', function (t) {
 })
 test('twine / effects / unscoped effects receive global actions', function (t) {
   t.plan(2)
-  const app = twine()({
+  const app = twine({
     state: {
       title: 'not set',
     },
@@ -94,7 +94,7 @@ test('twine / effects / unscoped effects receive global actions', function (t) {
 })
 test('twine / effects / receive other actions', function (t) {
   t.plan(2)
-  const app = twine()({
+  const app = twine({
     state: {},
     reducers: {
       foo: noop,
@@ -111,7 +111,7 @@ test('twine / effects / receive other actions', function (t) {
 })
 test('twine / effects / receive multiple arguments', function (t) {
   t.plan(3)
-  const app = twine()({
+  const app = twine({
     state: {},
     effects: {
       foo (state, actions, foo, bar, baz) {
@@ -125,7 +125,7 @@ test('twine / effects / receive multiple arguments', function (t) {
 })
 test('twine / effects / return from invocation', function (t) {
   t.plan(1)
-  const app = twine()({
+  const app = twine({
     state: {},
     effects: {
       foo () {
@@ -137,7 +137,7 @@ test('twine / effects / return from invocation', function (t) {
 })
 test('twine / effects / can be chained when using promises', function (t) {
   t.plan(1)
-  const app = twine()({
+  const app = twine({
     state: {},
     effects: {
       foo () {
@@ -153,7 +153,7 @@ test('twine / effects / can be chained when using promises', function (t) {
 })
 test('twine / effects / can be chained when using callbacks', function (t) {
   t.plan(1)
-  const app = twine()({
+  const app = twine({
     state: {},
     effects: {
       foo (state, actions, foo, done) {
@@ -171,7 +171,7 @@ test('twine / effects / can be chained when using callbacks', function (t) {
 })
 test('twine / scoped / effects receive local state and actions', function (t) {
   t.plan(4)
-  const app = twine()({
+  const app = twine({
     state: {
       title: 'not set',
     },
@@ -216,7 +216,7 @@ test('twine / scoped / effects receive local state and actions', function (t) {
 })
 test('twine / scoped / effects receive latest local state', function (t) {
   t.plan(1)
-  const app = twine()({
+  const app = twine({
     state: {},
     models: {
       scopedModel: {

@@ -4,7 +4,7 @@ const noop = () => null
 
 test('twine / composition / composition merges state together', function (t) {
   t.plan(2)
-  const app = twine()({
+  const app = twine({
     state: {
       foo: 'foo',
     },
@@ -25,7 +25,7 @@ test('twine / composition / composition merges state together', function (t) {
 })
 test('twine / composition / composition works with actions', function (t) {
   t.plan(2)
-  const app = twine()({
+  const app = twine({
     state: {},
     reducers: {
       foo: noop,
@@ -48,7 +48,7 @@ test('twine / composition / composition works with actions', function (t) {
 })
 test('twine / composition / reducers receive state', function (t) {
   t.plan(2)
-  const app = twine()({
+  const app = twine({
     state: {
       foo: 'foo',
     },
@@ -77,7 +77,7 @@ test('twine / composition / reducers receive state', function (t) {
 })
 test('twine / composition / effects receive state', function (t) {
   t.plan(4)
-  const app = twine()({
+  const app = twine({
     state: {
       foo: 'foo',
     },
@@ -106,7 +106,7 @@ test('twine / composition / effects receive state', function (t) {
 })
 test('twine / composition / effects receive child actions', function (t) {
   t.plan(8)
-  const app = twine()({
+  const app = twine({
     state: {
       foo: 'foo',
     },

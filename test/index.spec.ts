@@ -27,13 +27,13 @@ test('twine / app / example 1', function (t) {
       },
     },
   }
-  const app = twine(subscription)(model)
+  const app = twine(model, subscription)
   app.actions.update('bar')
   app.actions.async(1)
 })
 test('twine / app / example 2', function (t) {
   t.plan(6)
-  const app = twine()({
+  const app = twine({
     state: {
       foo: 'foo',
     },
@@ -113,9 +113,7 @@ test('twine / app / example 3', function (t) {
     },
   }
   let _state
-  const app = twine((state) => {
-    _state = state
-  })(model)
+  const app = twine(model, (state) => _state = state)
 
   app.actions.pages.login.setFormField('username', 'joseph@example.comm')
   t.equal(_state.pages.login.username, 'joseph@example.comm')
@@ -131,7 +129,7 @@ test('twine / app / example 3', function (t) {
 // Return of twine setup
 test('twine / return / actions contain reducers', function (t) {
   t.plan(2)
-  const app = twine()({
+  const app = twine({
     state: {},
     reducers: {
       myReducer () { return null },
