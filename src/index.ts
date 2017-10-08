@@ -18,22 +18,15 @@ export default function twine(model: Types.Model, opts?: Types.Opts) {
     const decoratedReducers = Object.keys(reducers || {}).map(key => {
       const reducer = reducers[key]
       const decoratedReducer = function(params = {}) {
-        // Call reducer & update the global state
-        const currentModel = utils.retrieveNestedModel(model, path) || model
         const previousState = Object.assign({}, state)
         const currentModelsState = path.length ? utils.getStateFromPath(state, path) : previousState
         const reducerResponse = reducer(Object.assign({state: currentModelsState}, params, {}))
         const newState = Object.assign({}, currentModelsState, reducerResponse)
         state = path.length ? utils.updateStateAtPath(state, path, newState) : newState
         state = utils.recursivelyUpdateComputedState(model, state, path)
-
-        // Plugins
-        const pluginArgs = Array.prototype.slice.call(arguments)
-        pluginUtils.onReducerCalled(plugins, state, previousState, reducer.name, pluginArgs)
+        pluginUtils.onReducerCalled(plugins, state, previousState, reducer.name, params)
         pluginUtils.onStateChange(plugins, state, previousState, actions)
-        return path.length && currentModel.scoped
-          ? Object.assign({}, currentModelsState, reducerResponse)
-          : state
+        return Object.assign({}, currentModelsState, reducerResponse)
       }
       const wrappedReducer = pluginUtils.wrapReducer(plugins, decoratedReducer)
       Object.defineProperty(wrappedReducer, 'name', { value: reducer.name })
