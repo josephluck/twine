@@ -1,7 +1,7 @@
 import * as test from 'tape'
 import twine from '../src/index'
 
-test('twine / computed / computed state called on instantiation', function(t) {
+test('twine / computed / computed state called on instantiation', t => {
   t.plan(3)
   let { state } = twine<any, any>(
     {
@@ -21,7 +21,7 @@ test('twine / computed / computed state called on instantiation', function(t) {
   t.equal(state.foo, 'foo', 'foo is correct on instantiation from computed function')
 })
 
-test('twine / computed / computed state in nested models are called on instantiation', function(t) {
+test('twine / computed / computed state in nested models are called on instantiation', t => {
   t.plan(6)
   let { state } = twine<any, any>(
     {
@@ -56,7 +56,7 @@ test('twine / computed / computed state in nested models are called on instantia
   t.equal(state.anotherModel.bar, 'bar', 'nested model computed state is correct on instantiation')
 })
 
-test('twine / computed / computed state receives state', function(t) {
+test('twine / computed / computed state receives state', t => {
   t.plan(1)
   let state
   twine<any, any>(
@@ -75,7 +75,7 @@ test('twine / computed / computed state receives state', function(t) {
   )
 })
 
-test('twine / computed / computed state receives state with nested models state', function(t) {
+test('twine / computed / computed state receives state with nested models state', t => {
   t.plan(2)
   let state
   twine<any, any>(
@@ -107,7 +107,7 @@ test('twine / computed / computed state receives state with nested models state'
   )
 })
 
-test('twine / computed / computed state effects global state', function(t) {
+test('twine / computed / computed state effects global state', t => {
   t.plan(2)
   let { state } = twine<any, any>(
     {
@@ -126,7 +126,7 @@ test('twine / computed / computed state effects global state', function(t) {
   t.equal(state.foo, 'foo', 'computed state is correct')
 })
 
-test('twine / computed / computed state called on state updates', function(t) {
+test('twine / computed / computed state called on state updates', t => {
   t.plan(2)
   let state
   const app = twine<any, any>(
@@ -153,7 +153,7 @@ test('twine / computed / computed state called on state updates', function(t) {
   app.actions.update()
 })
 
-test('twine / computed / computed state receives child models state on state updates', function(t) {
+test('twine / computed / computed state receives child models state on state updates', t => {
   t.plan(7)
   let { state, actions } = twine<any, any>(
     {
@@ -203,7 +203,7 @@ test('twine / computed / computed state receives child models state on state upd
   actions.update()
 })
 
-test('twine / computed / reducers receive state including computed state', function(t) {
+test('twine / computed / reducers receive state including computed state', t => {
   t.plan(4)
   let { state, actions } = twine<any, any>(
     {
@@ -231,7 +231,7 @@ test('twine / computed / reducers receive state including computed state', funct
   actions.update()
 })
 
-test('twine / computed / effects receive state including computed state', function(t) {
+test('twine / computed / effects receive state including computed state', t => {
   t.plan(2)
   let { state, actions } = twine<any, any>(
     {

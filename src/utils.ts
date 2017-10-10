@@ -8,7 +8,7 @@ export function arrayToObj(curr, prev) {
   return Object.assign({}, curr, prev)
 }
 
-export function mergeState(model: Types.Model) {
+export function mergeState(model: Types.ModelImpl<any, any, any>) {
   if (model.models) {
     let child = Object.keys(model.models)
       .map(key => ({
@@ -25,11 +25,15 @@ export function mergeState(model: Types.Model) {
   return Object.assign({}, localState, computedState)
 }
 
-export function createState(model: Types.Model) {
+export function createState(model: Types.ModelImpl<any, any, any>) {
   return mergeState(model)
 }
 
-export function retrieveNestedModel(model: Types.Model, path: string[], index: number = 0) {
+export function retrieveNestedModel(
+  model: Types.ModelImpl<any, any, any>,
+  path: string[],
+  index: number = 0,
+) {
   if (model.models) {
     let currModel = model.models[path[index]]
     if (currModel && currModel.models && currModel.models[path[index + 1]]) {
@@ -60,7 +64,7 @@ export function updateStateAtPath(state: Types.State, path: string[], value: any
 }
 
 export function recursivelyUpdateComputedState(
-  model: Types.Model,
+  model: Types.ModelImpl<any, any, any>,
   state: Types.State,
   path: string[],
 ) {

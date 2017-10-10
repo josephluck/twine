@@ -1,7 +1,7 @@
 import * as test from 'tape'
 import twine from '../src/index'
 
-test('twine / plugins / accepts a single function plugin', function(t) {
+test('twine / plugins / accepts a single function plugin', t => {
   t.plan(1)
   const plugins = (state, prev) => {
     t.pass('plugin called on state change')
@@ -24,7 +24,7 @@ test('twine / plugins / accepts a single function plugin', function(t) {
   app.actions.setTitle({ title: 'set' })
 })
 
-test('twine / plugins / accepts a plugin object', function(t) {
+test('twine / plugins / accepts a plugin object', t => {
   t.plan(3)
   const plugins = {
     onReducerCalled(state, prev, name, ...args) {
@@ -61,7 +61,7 @@ test('twine / plugins / accepts a plugin object', function(t) {
   app.actions.setTitleAsync({ title: 'set again' })
 })
 
-test('twine / plugins / accepts an array of plugin objects', function(t) {
+test('twine / plugins / accepts an array of plugin objects', t => {
   t.plan(6)
   const plugins = {
     onReducerCalled(state, prev, name, ...args) {
@@ -98,7 +98,7 @@ test('twine / plugins / accepts an array of plugin objects', function(t) {
   app.actions.setTitleAsync({ title: 'set again' })
 })
 
-test('twine / plugins / onReducerCalled plugin', function(t) {
+test('twine / plugins / onReducerCalled plugin', t => {
   t.plan(5)
   const plugins = {
     onReducerCalled(state, prev, name, args) {
@@ -133,7 +133,7 @@ test('twine / plugins / onReducerCalled plugin', function(t) {
   app.actions.setTitleAsync({ title: 'set again' })
 })
 
-test('twine / plugins / onEffectCalled plugin', function(t) {
+test('twine / plugins / onEffectCalled plugin', t => {
   t.plan(4)
   const plugins = {
     onEffectCalled(state, name, params) {
@@ -167,7 +167,7 @@ test('twine / plugins / onEffectCalled plugin', function(t) {
   app.actions.setTitleAsync({ title: 'set again' })
 })
 
-test('twine / plugins / onStateChange plugin', function(t) {
+test('twine / plugins / onStateChange plugin', t => {
   t.plan(3)
   const plugins = {
     onStateChange(state, prev) {
@@ -200,7 +200,7 @@ test('twine / plugins / onStateChange plugin', function(t) {
   app.actions.setTitleAsync({ title: 'set again' })
 })
 
-test('twine / plugins / wrapReducers plugin', function(t) {
+test('twine / plugins / wrapReducers plugin', t => {
   t.plan(5)
   const plugins = {
     wrapReducers(reducer) {
@@ -232,7 +232,7 @@ test('twine / plugins / wrapReducers plugin', function(t) {
   app.actions.setTitle({ title: 'set' })
 })
 
-test('twine / plugins / wrapEffects plugin', function(t) {
+test('twine / plugins / wrapEffects plugin', t => {
   t.plan(4)
   const plugins = {
     wrapEffects(effect) {
@@ -261,7 +261,7 @@ test('twine / plugins / wrapEffects plugin', function(t) {
   app.actions.setTitleAsync({ title: 'set' })
 })
 
-test('twine / plugins / wrapped effects and reducers retain their function names', function(t) {
+test('twine / plugins / wrapped effects and reducers retain their function names', t => {
   t.plan(2)
   const plugins = {
     wrapReducers(reducer) {

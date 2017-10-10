@@ -2,7 +2,7 @@ import * as test from 'tape'
 import twine from '../src/index'
 const noop = () => null
 
-test('twine / effects / receive state', function(t) {
+test('twine / effects / receive state', t => {
   t.plan(1)
   const app = twine<any, any>({
     state: {
@@ -16,7 +16,7 @@ test('twine / effects / receive state', function(t) {
   })
   app.actions.setTitle()
 })
-test('twine / effects / receive latest state', function(t) {
+test('twine / effects / receive latest state', t => {
   t.plan(1)
   const app = twine<any, any>({
     state: {
@@ -38,7 +38,7 @@ test('twine / effects / receive latest state', function(t) {
   app.actions.updateTitle({ title: 'updated title' })
   app.actions.checkLatestState()
 })
-test('twine / effects / unscoped effects receive global state', function(t) {
+test('twine / effects / unscoped effects receive global state', t => {
   t.plan(1)
   const app = twine<any, any>({
     state: {
@@ -65,7 +65,7 @@ test('twine / effects / unscoped effects receive global state', function(t) {
   app.actions.updateTitle({ title: 'updated title' })
   app.actions.unscopedModel.checkLatestState()
 })
-test('twine / effects / unscoped effects receive global actions', function(t) {
+test('twine / effects / unscoped effects receive global actions', t => {
   t.plan(2)
   const app = twine<any, any>({
     state: {
@@ -96,7 +96,7 @@ test('twine / effects / unscoped effects receive global actions', function(t) {
   })
   app.actions.unscopedModel.checkLatestState()
 })
-test('twine / effects / receive other actions', function(t) {
+test('twine / effects / receive other actions', t => {
   t.plan(2)
   const app = twine<any, any>({
     state: {},
@@ -113,7 +113,7 @@ test('twine / effects / receive other actions', function(t) {
   })
   app.actions.setTitle()
 })
-test('twine / effects / receive multiple arguments', function(t) {
+test('twine / effects / receive multiple arguments', t => {
   t.plan(3)
   const app = twine<any, any>({
     state: {},
@@ -127,7 +127,7 @@ test('twine / effects / receive multiple arguments', function(t) {
   })
   app.actions.foo({ foo: 'foo', bar: 'bar', baz: 'baz' })
 })
-test('twine / effects / return from invocation', function(t) {
+test('twine / effects / return from invocation', t => {
   t.plan(1)
   const app = twine<any, any>({
     state: {},
@@ -139,7 +139,7 @@ test('twine / effects / return from invocation', function(t) {
   })
   t.equal(typeof app.actions.foo(), 'number', 'effect returned from invocation')
 })
-test('twine / effects / can be chained when using promises', function(t) {
+test('twine / effects / can be chained when using promises', t => {
   t.plan(1)
   const app = twine<any, any>({
     state: {},
@@ -154,7 +154,7 @@ test('twine / effects / can be chained when using promises', function(t) {
   })
   app.actions.foo().then(() => app.actions.bar())
 })
-test('twine / effects / can be chained when using callbacks', function(t) {
+test('twine / effects / can be chained when using callbacks', t => {
   t.plan(1)
   const app = twine<any, any>({
     state: {},
@@ -175,7 +175,7 @@ test('twine / effects / can be chained when using callbacks', function(t) {
     },
   })
 })
-test('twine / scoped / effects receive local state and actions', function(t) {
+test('twine / scoped / effects receive local state and actions', t => {
   t.plan(4)
   const app = twine<any, any>({
     state: {
@@ -224,7 +224,7 @@ test('twine / scoped / effects receive local state and actions', function(t) {
   app.actions.counter.increment()
   app.actions.counter.anotherModel.update()
 })
-test('twine / scoped / effects receive latest local state', function(t) {
+test('twine / scoped / effects receive latest local state', t => {
   t.plan(1)
   const app = twine<any, any>({
     state: {},

@@ -2,7 +2,7 @@ import * as test from 'tape'
 import twine from '../src/index'
 
 // Subscription
-test('twine / subscription / called on state changes', function(t) {
+test('twine / subscription / called on state changes', t => {
   t.plan(1)
   const app = twine<any, any>(
     {
@@ -19,7 +19,7 @@ test('twine / subscription / called on state changes', function(t) {
   )
   app.actions.myReducer()
 })
-test('twine / subscription / receives new and old state', function(t) {
+test('twine / subscription / receives new and old state', t => {
   t.plan(2)
   const checkState = function(newState, oldState) {
     t.equal(oldState.title, 'not set', 'received previous state')

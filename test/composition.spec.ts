@@ -2,7 +2,7 @@ import * as test from 'tape'
 import twine from '../src/index'
 const noop = () => null
 
-test('twine / composition / composition merges state together', function(t) {
+test('twine / composition / composition merges state together', t => {
   t.plan(2)
   const app = twine<any, any>({
     state: {
@@ -23,7 +23,7 @@ test('twine / composition / composition merges state together', function(t) {
     t.fail('child state has not been merged')
   }
 })
-test('twine / composition / composition works with actions', function(t) {
+test('twine / composition / composition works with actions', t => {
   t.plan(2)
   const app = twine<any, any>({
     state: {},
@@ -46,7 +46,7 @@ test('twine / composition / composition works with actions', function(t) {
     t.fail('child method has not been merged')
   }
 })
-test('twine / composition / reducers receive state', function(t) {
+test('twine / composition / reducers receive state', t => {
   t.plan(2)
   const app = twine<any, any>({
     state: {
@@ -75,7 +75,7 @@ test('twine / composition / reducers receive state', function(t) {
   app.actions.foo()
   app.actions.bar.baz()
 })
-test('twine / composition / effects receive state', function(t) {
+test('twine / composition / effects receive state', t => {
   t.plan(4)
   const app = twine<any, any>({
     state: {
@@ -104,7 +104,7 @@ test('twine / composition / effects receive state', function(t) {
   app.actions.foo()
   app.actions.bar.baz()
 })
-test('twine / composition / effects receive child actions', function(t) {
+test('twine / composition / effects receive child actions', t => {
   t.plan(8)
   const app = twine<any, any>({
     state: {

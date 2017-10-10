@@ -2,7 +2,7 @@ import * as test from 'tape'
 import twine from '../src/index'
 
 // app examples
-test('twine / app / example 1', function(t) {
+test('twine / app / example 1', t => {
   t.plan(3)
   const subscription = function(state) {
     t.equal(state.title, 'bar')
@@ -31,7 +31,7 @@ test('twine / app / example 1', function(t) {
   app.actions.update({ title: 'bar' })
   app.actions.async({ timeout: 1 })
 })
-test('twine / app / example 2', function(t) {
+test('twine / app / example 2', t => {
   t.plan(6)
   const app = twine<any, any>({
     state: {
@@ -74,7 +74,7 @@ test('twine / app / example 2', function(t) {
   t.equal(app.state.levelTwo.foo, 'bar', 'level two state is correct')
   t.equal(app.state.levelTwo.levelThree.foo, 'baz', 'level three state is correct')
 })
-test('twine / app / example 3', function(t) {
+test('twine / app / example 3', t => {
   t.plan(6)
   const model = {
     state: {},
@@ -127,7 +127,7 @@ test('twine / app / example 3', function(t) {
 })
 
 // Return of twine setup
-test('twine / return / actions contain reducers', function(t) {
+test('twine / return / actions contain reducers', t => {
   t.plan(2)
   const app = twine<any, any>({
     state: {},
@@ -142,4 +142,4 @@ test('twine / return / actions contain reducers', function(t) {
 })
 test.skip('skip / twine / return / state is available')
 
-test.skip('skip / twine / scoped / hooks still work as expected with global state', function(t) {})
+test.skip('skip / twine / scoped / hooks still work as expected with global state', t => {})

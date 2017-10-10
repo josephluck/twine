@@ -1,7 +1,7 @@
 import * as test from 'tape'
 import twine from '../src/index'
 
-test('twine / reducers / receive state', function(t) {
+test('twine / reducers / receive state', t => {
   t.plan(1)
   const app = twine<any, any>({
     state: {
@@ -15,7 +15,7 @@ test('twine / reducers / receive state', function(t) {
   })
   app.actions.setTitle()
 })
-test('twine / reducers / receive latest state', function(t) {
+test('twine / reducers / receive latest state', t => {
   t.plan(2)
   const app = twine<any, any>({
     state: {
@@ -56,7 +56,7 @@ test('twine / reducers / receive latest state', function(t) {
   app.actions.nested.updateFoo({ foo: 'updated foo' })
   app.actions.nested.checkLatestState()
 })
-test('twine / reducers / receive multiple params', function(t) {
+test('twine / reducers / receive multiple params', t => {
   t.plan(2)
   const app = twine<any, any>({
     state: {},
@@ -69,7 +69,7 @@ test('twine / reducers / receive multiple params', function(t) {
   })
   app.actions.setTitle({ title: 'foo', other: 123 })
 })
-test('twine / reducers / return from invocation', function(t) {
+test('twine / reducers / return from invocation', t => {
   t.plan(2)
   const app = twine<any, any>({
     state: {},
@@ -87,7 +87,7 @@ test('twine / reducers / return from invocation', function(t) {
   const secondReducerReturn = app.actions.secondReducer()
   t.equal(typeof secondReducerReturn.title, 'number', 'second reducer returned correctly')
 })
-test('twine / reducers / return global state', function(t) {
+test('twine / reducers / return global state', t => {
   t.plan(13)
   let state
   const app = twine<any, any>(
@@ -168,7 +168,7 @@ test('twine / reducers / return global state', function(t) {
   const reducer5 = app.actions.nested.nestedAgain.thirdReducer({ title: 'updated' })
   t.equal(reducer5.title, 'updated', 'state is correct after fourth (scoped) reducer')
 })
-test('twine / reducers / update state', function(t) {
+test('twine / reducers / update state', t => {
   t.plan(12)
   let state
   const app = twine<any, any>(
@@ -216,7 +216,7 @@ test('twine / reducers / update state', function(t) {
   t.equal(state.foo, 'untouched', 'foo left untouched')
   t.equal(state.nested.title, 'update meeeeee', 'nested state updated')
 })
-test('twine / scoped / reducers update local state effecting global state', function(t) {
+test('twine / scoped / reducers update local state effecting global state', t => {
   t.plan(8)
   function subscribeOne(state) {
     t.equal(state.title, 'not set', 'title remains unchanged')
@@ -310,7 +310,7 @@ test('twine / scoped / reducers update local state effecting global state', func
   )
   appTwo.actions.counter.increment()
 })
-test('twine / scoped / reducers receive local state', function(t) {
+test('twine / scoped / reducers receive local state', t => {
   t.plan(2)
   const app = twine<any, any>({
     state: {
@@ -347,7 +347,7 @@ test('twine / scoped / reducers receive local state', function(t) {
   app.actions.counter.increment()
   app.actions.counter.anotherModel.update()
 })
-test('twine / scoped / reducers return local state', function(t) {
+test('twine / scoped / reducers return local state', t => {
   t.plan(3)
   const app = twine<any, any>({
     state: {

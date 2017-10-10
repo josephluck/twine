@@ -39,8 +39,7 @@ export default function twine<S, A>(model: Types.ModelImpl<any, any, any>, opts?
           const nestedModel = utils.retrieveNestedModel(model, path)
           const effectState = nestedModel.scoped ? utils.getStateFromPath(state, path) : state
           const effectActions = nestedModel.scoped ? utils.getStateFromPath(actions, path) : actions
-          const args = Array.prototype.slice.call(arguments)
-          pluginUtils.onEffectCalled(plugins, state, effect.name, args)
+          pluginUtils.onEffectCalled(plugins, state, effect.name, params)
           return effect(Object.assign({ state: effectState, actions: effectActions }, params, {}))
         } else {
           pluginUtils.onEffectCalled(plugins, state, effect.name, params)
