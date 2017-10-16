@@ -1,49 +1,61 @@
 import twine from '../../src'
 import log from '../../src/log'
+import { Twine } from '../../src/types'
 import html from 'yo-yo'
 
-function subscribe (_state, _prev, _actions) {
-  state = _state
-  actions = _actions
-  render()
+interface State {
+  title: string
 }
+interface Reducers {
+  updateTitle: Twine.Reducer<State, { title: string }>
+}
+interface Effects {
+  updateAsync: Twine.Effect<State, Actions, { title: string }>
+}
+type Actions = Twine.Actions<Reducers, Effects>
 
-const plugins = [
-  subscribe,
-  log,
-]
-
-let {state, actions} = twine(plugins)({
+const model: Twine.ModelImpl<State, Reducers, Effects> = {
   state: {
     title: 'foo',
   },
   reducers: {
-    updateTitle (state, title, abc) {
-      return {title}
+    updateTitle({ title }) {
+      return { title }
     },
   },
   effects: {
-    updateAsync (state, actions, title, abc) {
-      return actions.updateTitle(title, abc)
+    updateAsync({ state, actions, title }) {
+      setTimeout(() => {
+        actions!.updateTitle({ title })
+      })
     },
   },
-})
-
-function view () {
-  return html`
-    <div>
-      ${state.title}
-      <input value=${state.title} oninput=${e => actions.updateTitle(e.target.value, Math.random())} />
-      <input value=${state.title} oninput=${e => actions.updateAsync(e.target.value, Math.random())} />
-    </div>
-  `
 }
 
+const view = (state: State, actions: Actions) => html`
+  <div>
+    ${state.title}
+    <input
+      value=${state.title}
+      oninput=${e => actions.updateTitle({ title: e.target.value })}
+    />
+    <input
+      value=${state.title}
+      oninput=${e => actions.updateAsync({ title: e.target.value })}
+    />
+  </div>
+`
+
+const subscribe: Twine.Subscriber<State, Actions> = (newState, oldState, newActions) => {
+  render(newState, newActions)
+}
+
+const plugins = [subscribe, log]
+const app = twine<State, Actions>(model, plugins)
 const mount = document.createElement('div')
 document.body.appendChild(mount)
 
-function render () {
-  html.update(mount, view())
+const render = (state: State, actions: Actions) => {
+  html.update(mount, view(state, actions))
 }
-
-render()
+render(app.state, app.actions)

@@ -15,8 +15,9 @@
 			"dom"
 		],
 		"noUnusedLocals": true,
-		"strictNullChecks": false,
-		"removeComments": false
+		"strictNullChecks": true,
+		"removeComments": false,
+		"noImplicitAny": true
 	},
 	"include": [
 		"src/**/*"

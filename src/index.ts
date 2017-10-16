@@ -1,4 +1,4 @@
-import * as Types from './types'
+import { Twine as Types } from './types'
 import * as pluginUtils from './plugins'
 import * as utils from './utils'
 
@@ -17,7 +17,7 @@ export default function twine<S, A>(model: Types.ModelImpl<any, any, any>, opts?
   ) {
     const decoratedReducers = Object.keys(reducers || {}).map(key => {
       const reducer = reducers[key]
-      const decoratedReducer = function(params = {}) {
+      const decoratedReducer = function (params = {}) {
         const previousState = Object.assign({}, state)
         const currentModelsState = path.length ? utils.getStateFromPath(state, path) : previousState
         const reducerResponse = reducer(Object.assign({ state: currentModelsState }, params, {}))
@@ -34,7 +34,7 @@ export default function twine<S, A>(model: Types.ModelImpl<any, any, any>, opts?
     })
     const decoratedEffects = Object.keys(effects || {}).map(key => {
       const effect = effects[key]
-      const decoratedEffect = function(params = {}) {
+      const decoratedEffect = function (params = {}) {
         if (path.length) {
           const nestedModel = utils.retrieveNestedModel(model, path)
           const effectState = nestedModel.scoped ? utils.getStateFromPath(state, path) : state
@@ -50,14 +50,14 @@ export default function twine<S, A>(model: Types.ModelImpl<any, any, any>, opts?
       Object.defineProperty(wrappedEffect, 'name', { value: effect.name })
       return { [key]: wrappedEffect }
     })
-    return decoratedReducers.concat(decoratedEffects).reduce(utils.arrayToObj, {})
+    return decoratedReducers.concat(decoratedEffects).reduce(utils.arrayToObj)
   }
 
-  function createActions(model: Types.ModelImpl<any, any, any>, path: string[]) {
+  function createActions(model: Types.ModelImpl<any, any, any>, path: string[]): Types.Actions<any, any> {
     if (model.models) {
       const child = Object.keys(model.models)
         .map(key => ({
-          [key]: createActions(model.models[key], path.concat(key)),
+          [key]: createActions(model.models![key], path.concat(key)),
         }))
         .reduce(utils.arrayToObj, {})
       return Object.assign({}, decorateActions(model.reducers, model.effects, path), child)
