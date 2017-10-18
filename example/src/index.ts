@@ -1,6 +1,6 @@
 import twine from '../../src'
 import log from '../../src/log'
-import { Twine } from '../../src/types'
+import * as Twine from '../../src/types'
 import html from 'yo-yo'
 
 interface State {
@@ -24,7 +24,7 @@ const model: Twine.ModelImpl<State, Reducers, Effects> = {
     },
   },
   effects: {
-    updateAsync({ state, actions, title }) {
+    updateAsync(state, actions, { title }) {
       setTimeout(() => {
         actions!.updateTitle({ title })
       })
@@ -37,11 +37,11 @@ const view = (state: State, actions: Actions) => html`
     ${state.title}
     <input
       value=${state.title}
-      oninput=${e => actions.updateTitle({ title: e.target.value })}
+      oninput=${(e: any) => actions.updateTitle({ title: e.target.value })}
     />
     <input
       value=${state.title}
-      oninput=${e => actions.updateAsync({ title: e.target.value })}
+      oninput=${(e: any) => actions.updateAsync({ title: e.target.value })}
     />
   </div>
 `

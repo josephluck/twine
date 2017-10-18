@@ -17,9 +17,9 @@
 		"noUnusedLocals": true,
 		"strictNullChecks": true,
 		"removeComments": false,
-		"noImplicitAny": true
+		"noImplicitAny": false
 	},
 	"include": [
 		"src/**/*"
-  ]
+	]
 }

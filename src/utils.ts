@@ -1,18 +1,19 @@
-import * as Types from './types'
+import * as Twine from './types'
 
 export function noop() {
   return null
 }
 
-export function arrayToObj(curr, prev) {
+export function arrayToObj(curr: any, prev: any): any {
   return Object.assign({}, curr, prev)
 }
 
-export function mergeState(model: Types.ModelImpl<any, any, any>) {
-  if (model.models) {
-    let child = Object.keys(model.models)
+export function mergeState(model: Twine.ModelImpl<any, any, any>): any {
+  const models = model.models
+  if (models) {
+    let child = Object.keys(models)
       .map(key => ({
-        [key]: mergeState(model.models[key]),
+        [key]: mergeState(models[key]),
       }))
       .reduce(arrayToObj, {})
 
@@ -25,15 +26,15 @@ export function mergeState(model: Types.ModelImpl<any, any, any>) {
   return Object.assign({}, localState, computedState)
 }
 
-export function createState(model: Types.ModelImpl<any, any, any>) {
+export function createState(model: Twine.ModelImpl<any, any, any>) {
   return mergeState(model)
 }
 
 export function retrieveNestedModel(
-  model: Types.ModelImpl<any, any, any>,
+  model: Twine.ModelImpl<any, any, any>,
   path: string[],
   index: number = 0,
-) {
+): Twine.ModelImpl<any, any, any> {
   if (model.models) {
     let currModel = model.models[path[index]]
     if (currModel && currModel.models && currModel.models[path[index + 1]]) {
@@ -44,14 +45,14 @@ export function retrieveNestedModel(
   return model
 }
 
-export function getStateFromPath(state: Types.State, path: string[]) {
+export function getStateFromPath(state: Twine.State, path: string[]): Twine.State {
   if (path.length) {
     return getStateFromPath(state[path[0]], path.slice(1))
   }
   return state
 }
 
-export function updateStateAtPath(state: Types.State, path: string[], value: any) {
+export function updateStateAtPath(state: Twine.State, path: string[], value: any) {
   if (path.length > 0) {
     let key = path[0]
     if (path.length > 1) {
@@ -64,10 +65,10 @@ export function updateStateAtPath(state: Types.State, path: string[], value: any
 }
 
 export function recursivelyUpdateComputedState(
-  model: Types.ModelImpl<any, any, any>,
-  state: Types.State,
+  model: Twine.ModelImpl<any, any, any>,
+  state: Twine.State,
   path: string[],
-) {
+): Twine.State {
   const currentModel = retrieveNestedModel(model, path)
   const currentState = getStateFromPath(state, path)
   const computedState = currentModel

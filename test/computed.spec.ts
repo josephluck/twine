@@ -172,7 +172,7 @@ test('twine / computed / computed state receives child models state on state upd
         }
       },
       reducers: {
-        update({ state }) {
+        update(state) {
           return {
             title: state.title,
           }
@@ -217,7 +217,7 @@ test('twine / computed / reducers receive state including computed state', t => 
         }
       },
       reducers: {
-        update({ state }) {
+        update(state) {
           t.equal(state.title, 'not set', 'reducer received computed state')
           t.equal(state.foo, 'foo', 'reducer received computed state')
           return {
@@ -244,7 +244,7 @@ test('twine / computed / effects receive state including computed state', t => {
         }
       },
       effects: {
-        update({ state }) {
+        update(state) {
           t.equal(state.title, 'not set', 'effect received computed state')
           t.equal(state.foo, 'foo', 'effect received computed state')
         },
@@ -255,7 +255,7 @@ test('twine / computed / effects receive state including computed state', t => {
   actions.update()
 })
 
-test('twine / computed / computed functions in parent models trigger when child models change state', function(
+test('twine / computed / computed functions in parent models trigger when child models change state', function (
   t,
 ) {
   t.plan(12)

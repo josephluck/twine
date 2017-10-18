@@ -21,7 +21,7 @@ test('twine / subscription / called on state changes', t => {
 })
 test('twine / subscription / receives new and old state', t => {
   t.plan(2)
-  const checkState = function(newState, oldState) {
+  const checkState = function (newState, oldState) {
     t.equal(oldState.title, 'not set', 'received previous state')
     t.equal(newState.title, 'set', 'received new state')
   }

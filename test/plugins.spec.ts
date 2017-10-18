@@ -1,5 +1,6 @@
 import * as test from 'tape'
 import twine from '../src/index'
+import * as Twine from '../src/types'
 
 test('twine / plugins / accepts a single function plugin', t => {
   t.plan(1)
@@ -12,7 +13,7 @@ test('twine / plugins / accepts a single function plugin', t => {
         title: 'not set',
       },
       reducers: {
-        setTitle({ state, title }) {
+        setTitle(state, { title }) {
           return {
             title,
           }
@@ -43,14 +44,14 @@ test('twine / plugins / accepts a plugin object', t => {
         title: 'not set',
       },
       reducers: {
-        setTitle({ state, title }) {
+        setTitle(state, { title }) {
           return {
             title,
           }
         },
       },
       effects: {
-        setTitleAsync({ state, actions, title }) {
+        setTitleAsync(state, actions, { title }) {
           return null
         },
       },
@@ -80,14 +81,14 @@ test('twine / plugins / accepts an array of plugin objects', t => {
         title: 'not set',
       },
       reducers: {
-        setTitle({ state, title }) {
+        setTitle(state, { title }) {
           return {
             title,
           }
         },
       },
       effects: {
-        setTitleAsync({ state, actions, title }) {
+        setTitleAsync(state, actions, { title }) {
           return null
         },
       },
@@ -115,14 +116,14 @@ test('twine / plugins / onReducerCalled plugin', t => {
         title: 'not set',
       },
       reducers: {
-        setTitle({ state, title }) {
+        setTitle(state, { title }) {
           return {
             title,
           }
         },
       },
       effects: {
-        setTitleAsync({ state, actions, title }) {
+        setTitleAsync(state, actions, { title }) {
           return null
         },
       },
@@ -142,21 +143,21 @@ test('twine / plugins / onEffectCalled plugin', t => {
       t.equal(params.title, 'set again', 'onEffectCalled plugin received correct arguments')
       t.equal(name, 'setTitleAsync', 'onEffectCalled plugin received correct effect name')
     },
-  }
+  } as Twine.Plugin
   const app = twine<any, any>(
     {
       state: {
         title: 'not set',
       },
       reducers: {
-        setTitle({ state, title }) {
+        setTitle(state, { title }) {
           return {
             title,
           }
         },
       },
       effects: {
-        setTitleAsync({ state, actions, title }) {
+        setTitleAsync(state, actions, { title }) {
           return null
         },
       },
@@ -175,21 +176,21 @@ test('twine / plugins / onStateChange plugin', t => {
       t.equal(prev.title, 'not set', 'onStateChange plugin received correct prev state')
       t.equal(state.title, 'set', 'onStateChange plugin received correct new state')
     },
-  }
+  } as Twine.Plugin
   const app = twine<any, any>(
     {
       state: {
         title: 'not set',
       },
       reducers: {
-        setTitle({ state, title }) {
+        setTitle(state, { title }) {
           return {
             title,
           }
         },
       },
       effects: {
-        setTitleAsync({ state, actions, title }) {
+        setTitleAsync(state, actions, { title }) {
           return null
         },
       },
@@ -205,19 +206,19 @@ test('twine / plugins / wrapReducers plugin', t => {
   const plugins = {
     wrapReducers(reducer) {
       t.pass('wrap reducers called with reducer')
-      return function(params) {
+      return function (params) {
         t.pass('wrapped reducer called')
         return reducer(Object.assign({ abc: 123 }, params, {}))
       }
     },
-  }
+  } as Twine.Plugin
   const app = twine<any, any>(
     {
       state: {
         title: 'not set',
       },
       reducers: {
-        setTitle({ state, title, abc }) {
+        setTitle(state, { title, abc }) {
           t.pass('wrapped reducer calls original reducer')
           t.equal(title, 'set', 'original reducer received correct input argument')
           t.equal(abc, 123, 'original reducer received additional argument from plugin')
@@ -236,19 +237,19 @@ test('twine / plugins / wrapEffects plugin', t => {
   t.plan(4)
   const plugins = {
     wrapEffects(effect) {
-      return function(params) {
+      return function (params) {
         t.pass('wrapped effect called')
         return effect(Object.assign({ abc: 123 }, params, {}))
       }
     },
-  }
+  } as Twine.Plugin
   const app = twine<any, any>(
     {
       state: {
         title: 'not set',
       },
       effects: {
-        setTitleAsync({ state, actions, title, abc }) {
+        setTitleAsync(state, actions, { title, abc }) {
           t.pass('wrapped effect calls original effect')
           t.equal(title, 'set', 'original effect received correct input argument')
           t.equal(abc, 123, 'original effect received additional argument from plugin')
@@ -265,16 +266,16 @@ test('twine / plugins / wrapped effects and reducers retain their function names
   t.plan(2)
   const plugins = {
     wrapReducers(reducer) {
-      return function(params) {
+      return function (params) {
         return reducer(params)
       }
     },
     wrapEffects(effect) {
-      return function(params) {
+      return function (params) {
         return effect(params)
       }
     },
-  }
+  } as Twine.Plugin
   const app = twine<any, any>(
     {
       state: {

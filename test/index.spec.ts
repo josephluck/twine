@@ -4,7 +4,7 @@ import twine from '../src/index'
 // app examples
 test('twine / app / example 1', t => {
   t.plan(3)
-  const subscription = function(state) {
+  const subscription = function (state) {
     t.equal(state.title, 'bar')
   }
   const model = {
@@ -12,15 +12,15 @@ test('twine / app / example 1', t => {
       title: 'foo',
     },
     reducers: {
-      update({ state, title }) {
+      update(state, { title }) {
         return {
           title: title,
         }
       },
     },
     effects: {
-      async({ state, actions, timeout }) {
-        setTimeout(function() {
+      async(state, actions, { timeout }) {
+        setTimeout(function () {
           t.equal(typeof actions.update, 'function', 'effect called and received actions')
           t.equal(state.title, 'bar', 'effect called and received latest state')
         }, timeout)
@@ -95,7 +95,7 @@ test('twine / app / example 3', t => {
               password: 'password',
             },
             reducers: {
-              setFormField({ state, key, value }) {
+              setFormField(state, { key, value }) {
                 return {
                   ...state,
                   [key]: value,
@@ -103,7 +103,7 @@ test('twine / app / example 3', t => {
               },
             },
             effects: {
-              updateFormField({ state, actions, key, value }) {
+              updateFormField(state, actions, { key, value }) {
                 return actions.setFormField({ key, value })
               },
             },
@@ -142,4 +142,4 @@ test('twine / return / actions contain reducers', t => {
 })
 test.skip('skip / twine / return / state is available')
 
-test.skip('skip / twine / scoped / hooks still work as expected with global state', t => {})
+test.skip('skip / twine / scoped / hooks still work as expected with global state', t => { })

@@ -1,8 +1,8 @@
-import { Twine as Types } from './types'
+import * as Twine from './types'
 import * as pluginUtils from './plugins'
 import * as utils from './utils'
 
-export default function twine<S, A>(model: Types.ModelImpl<any, any, any>, opts?: Types.Opts) {
+export default function twine<S, A>(model: Twine.ModelImpl<any, any, any>, opts?: Twine.Opts) {
   if (!opts) {
     opts = utils.noop
   }
@@ -11,8 +11,8 @@ export default function twine<S, A>(model: Types.ModelImpl<any, any, any>, opts?
   let actions = createActions(model, [])
 
   function decorateActions(
-    reducers: Types.ModelImpl<any, any, any>['reducers'],
-    effects: Types.ModelImpl<any, any, any>['effects'],
+    reducers: Twine.ModelImpl<any, any, any>['reducers'],
+    effects: Twine.ModelImpl<any, any, any>['effects'],
     path: string[],
   ) {
     const decoratedReducers = Object.keys(reducers || {}).map(key => {
@@ -20,7 +20,7 @@ export default function twine<S, A>(model: Types.ModelImpl<any, any, any>, opts?
       const decoratedReducer = function (params = {}) {
         const previousState = Object.assign({}, state)
         const currentModelsState = path.length ? utils.getStateFromPath(state, path) : previousState
-        const reducerResponse = reducer(Object.assign({ state: currentModelsState }, params, {}))
+        const reducerResponse = reducer(currentModelsState, params)
         const newState = Object.assign({}, currentModelsState, reducerResponse)
         state = path.length ? utils.updateStateAtPath(state, path, newState) : newState
         state = utils.recursivelyUpdateComputedState(model, state, path)
@@ -40,20 +40,20 @@ export default function twine<S, A>(model: Types.ModelImpl<any, any, any>, opts?
           const effectState = nestedModel.scoped ? utils.getStateFromPath(state, path) : state
           const effectActions = nestedModel.scoped ? utils.getStateFromPath(actions, path) : actions
           pluginUtils.onEffectCalled(plugins, state, effect.name, params)
-          return effect(Object.assign({ state: effectState, actions: effectActions }, params, {}))
+          return effect(effectState, effectActions, params)
         } else {
           pluginUtils.onEffectCalled(plugins, state, effect.name, params)
-          return effect(Object.assign({ state, actions }, params, {}))
+          return effect(state, actions, params)
         }
       }
       const wrappedEffect = pluginUtils.wrapEffect(plugins, decoratedEffect)
       Object.defineProperty(wrappedEffect, 'name', { value: effect.name })
       return { [key]: wrappedEffect }
     })
-    return decoratedReducers.concat(decoratedEffects).reduce(utils.arrayToObj)
+    return decoratedReducers.concat(decoratedEffects).reduce(utils.arrayToObj, [])
   }
 
-  function createActions(model: Types.ModelImpl<any, any, any>, path: string[]): Types.Actions<any, any> {
+  function createActions(model: Twine.ModelImpl<any, any, any>, path: string[]): Twine.Actions<any, any> {
     if (model.models) {
       const child = Object.keys(model.models)
         .map(key => ({
@@ -68,5 +68,5 @@ export default function twine<S, A>(model: Types.ModelImpl<any, any, any>, opts?
   return {
     state,
     actions,
-  } as Types.Return<S, A>
+  } as Twine.Return<S, A>
 }

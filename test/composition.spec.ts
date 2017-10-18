@@ -53,7 +53,7 @@ test('twine / composition / reducers receive state', t => {
       foo: 'foo',
     },
     reducers: {
-      foo({ state }) {
+      foo(state) {
         t.equal(state.foo, 'foo', 'parent reducer received state')
         return state
       },
@@ -64,7 +64,7 @@ test('twine / composition / reducers receive state', t => {
           baz: 'baz',
         },
         reducers: {
-          baz({ state }) {
+          baz(state) {
             t.equal(state.baz, 'baz', 'child reducer received state')
             return state
           },
@@ -82,7 +82,7 @@ test('twine / composition / effects receive state', t => {
       foo: 'foo',
     },
     effects: {
-      foo({ state }) {
+      foo(state) {
         t.equal(state.foo, 'foo', 'parent effect received state')
         t.equal(state.bar.baz, 'baz', 'parent effect can access child state')
       },
@@ -93,7 +93,7 @@ test('twine / composition / effects receive state', t => {
           baz: 'baz',
         },
         effects: {
-          baz({ state }) {
+          baz(state) {
             t.equal(state.bar.baz, 'baz', 'child effect received state')
             t.equal(state.foo, 'foo', 'child effect cannot access parent state')
           },
@@ -114,7 +114,7 @@ test('twine / composition / effects receive child actions', t => {
       qaz: noop,
     },
     effects: {
-      foo({ state, actions }) {
+      foo(state, actions) {
         t.equal(typeof actions.foo, 'function', 'parent effect can call parent effect')
         t.equal(typeof actions.qaz, 'function', 'parent effect can call parent reducer')
         t.equal(typeof actions.bar.baz, 'function', 'parent effect can call child effect')
@@ -130,7 +130,7 @@ test('twine / composition / effects receive child actions', t => {
           quuz: noop,
         },
         effects: {
-          baz({ state, actions }) {
+          baz(state, actions) {
             t.equal(typeof actions.foo, 'function', 'child effect can call parent effect')
             t.equal(typeof actions.qaz, 'function', 'child effect can call parent reducer')
             t.equal(typeof actions.bar.baz, 'function', 'child effect can call child effect')

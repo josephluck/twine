@@ -9,7 +9,7 @@ test('twine / effects / receive state', t => {
       title: 'not set',
     },
     effects: {
-      setTitle({ state }) {
+      setTitle(state) {
         t.equal(state.title, 'not set', 'reducer received state')
       },
     },
@@ -23,14 +23,14 @@ test('twine / effects / receive latest state', t => {
       title: 'not set',
     },
     reducers: {
-      updateTitle({ state, title }) {
+      updateTitle(state, { title }) {
         return {
           title: title,
         }
       },
     },
     effects: {
-      checkLatestState({ state }) {
+      checkLatestState(state) {
         t.equal(state.title, 'updated title', 'reducer received state')
       },
     },
@@ -45,7 +45,7 @@ test('twine / effects / unscoped effects receive global state', t => {
       title: 'not set',
     },
     reducers: {
-      updateTitle({ state, title }) {
+      updateTitle(state, { title }) {
         return {
           title: title,
         }
@@ -55,7 +55,7 @@ test('twine / effects / unscoped effects receive global state', t => {
       unscopedModel: {
         state: {},
         effects: {
-          checkLatestState({ state }) {
+          checkLatestState(state) {
             t.equal(state.title, 'updated title', 'effect received global state')
           },
         },
@@ -72,7 +72,7 @@ test('twine / effects / unscoped effects receive global actions', t => {
       title: 'not set',
     },
     reducers: {
-      updateTitle({ state, title }) {
+      updateTitle(state, { title }) {
         return {
           title: title,
         }
@@ -82,7 +82,7 @@ test('twine / effects / unscoped effects receive global actions', t => {
       unscopedModel: {
         state: {},
         effects: {
-          checkLatestState({ state, actions }) {
+          checkLatestState(state, actions) {
             t.equal(typeof actions.updateTitle, 'function', 'effect received global action')
             t.equal(
               typeof actions.unscopedModel.checkLatestState,
@@ -105,7 +105,7 @@ test('twine / effects / receive other actions', t => {
     },
     effects: {
       myOtherEffect: noop,
-      setTitle({ state, actions }) {
+      setTitle(state, actions) {
         t.equal(typeof actions.foo, 'function', 'effect received other reducer method')
         t.equal(typeof actions.myOtherEffect, 'function', 'effect received other effect method')
       },
@@ -118,7 +118,7 @@ test('twine / effects / receive multiple arguments', t => {
   const app = twine<any, any>({
     state: {},
     effects: {
-      foo({ state, actions, foo, bar, baz }) {
+      foo(state, actions, { foo, bar, baz }) {
         t.equal(foo, 'foo', 'effect received first argument')
         t.equal(bar, 'bar', 'effect received second argument')
         t.equal(baz, 'baz', 'effect received third argument')
@@ -159,7 +159,7 @@ test('twine / effects / can be chained when using callbacks', t => {
   const app = twine<any, any>({
     state: {},
     effects: {
-      foo({ state, actions, foo, done }) {
+      foo(state, actions, { foo, done }) {
         done(foo)
         return foo
       },
@@ -189,10 +189,10 @@ test('twine / scoped / effects receive local state and actions', t => {
           count: 1,
         },
         reducers: {
-          foo() {},
+          foo() { },
         },
         effects: {
-          increment({ state, actions }) {
+          increment(state, actions) {
             t.equal(state.count, 1, 'first level effect received local state')
             t.equal(typeof actions.foo, 'function', 'first level effect received local actions')
           },
@@ -204,10 +204,10 @@ test('twine / scoped / effects receive local state and actions', t => {
               myState: 'hey',
             },
             reducers: {
-              bar() {},
+              bar() { },
             },
             effects: {
-              update({ state, actions }) {
+              update(state, actions) {
                 t.equal(state.myState, 'hey', 'second level effect received local state')
                 t.equal(
                   typeof actions.bar,
@@ -235,14 +235,14 @@ test('twine / scoped / effects receive latest local state', t => {
           title: 'not set',
         },
         reducers: {
-          updateTitle({ state, title }) {
+          updateTitle(state, { title }) {
             return {
               title: title,
             }
           },
         },
         effects: {
-          checkLatestState({ state }) {
+          checkLatestState(state) {
             t.equal(state.title, 'updated title', 'effect received local state')
           },
         },
@@ -252,6 +252,6 @@ test('twine / scoped / effects receive latest local state', t => {
   app.actions.scopedModel.updateTitle({ title: 'updated title' })
   app.actions.scopedModel.checkLatestState()
 })
-test.skip('skip / twine / scoped / effects receive local actions that update global state', function(
+test.skip('skip / twine / scoped / effects receive local actions that update global state', function (
   t,
-) {})
+) { })

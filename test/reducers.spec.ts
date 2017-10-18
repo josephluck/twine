@@ -8,7 +8,7 @@ test('twine / reducers / receive state', t => {
       title: 'not set',
     },
     reducers: {
-      setTitle({ state }) {
+      setTitle(state) {
         t.equal(state.title, 'not set', 'reducer received state')
       },
     },
@@ -22,12 +22,12 @@ test('twine / reducers / receive latest state', t => {
       title: 'not set',
     },
     reducers: {
-      updateTitle({ state, title }) {
+      updateTitle(state, { title }) {
         return {
           title,
         }
       },
-      checkLatestState({ state }) {
+      checkLatestState(state) {
         t.equal(state.title, 'updated title', 'reducer received latest state')
         return state
       },
@@ -38,12 +38,12 @@ test('twine / reducers / receive latest state', t => {
           foo: 'not set',
         },
         reducers: {
-          updateFoo({ state, foo }) {
+          updateFoo(state, { foo }) {
             return {
               foo,
             }
           },
-          checkLatestState({ state }) {
+          checkLatestState(state) {
             t.equal(state.foo, 'updated foo', 'nested reducer received latest state')
             return state
           },
@@ -61,7 +61,7 @@ test('twine / reducers / receive multiple params', t => {
   const app = twine<any, any>({
     state: {},
     reducers: {
-      setTitle({ state, title, other }) {
+      setTitle(state, { title, other }) {
         t.equal(title, 'foo', 'first argument is okay')
         t.equal(other, 123, 'second argument is okay')
       },
@@ -74,7 +74,7 @@ test('twine / reducers / return from invocation', t => {
   const app = twine<any, any>({
     state: {},
     reducers: {
-      firstReducer({ state, title }) {
+      firstReducer(state, { title }) {
         return { title }
       },
       secondReducer() {
@@ -97,7 +97,7 @@ test('twine / reducers / return global state', t => {
         foo: 'untouched',
       },
       reducers: {
-        firstReducer({ state, title }) {
+        firstReducer(state, { title }) {
           return { title }
         },
       },
@@ -107,7 +107,7 @@ test('twine / reducers / return global state', t => {
             title: 'not set',
           },
           reducers: {
-            secondReducer({ state, title }) {
+            secondReducer(state, { title }) {
               return {
                 title,
               }
@@ -120,7 +120,7 @@ test('twine / reducers / return global state', t => {
                 title: 'nested again',
               },
               reducers: {
-                thirdReducer({ state, title }) {
+                thirdReducer(state, { title }) {
                   return {
                     title,
                   }
@@ -178,7 +178,7 @@ test('twine / reducers / update state', t => {
         foo: 'untouched',
       },
       reducers: {
-        firstReducer({ state, title }) {
+        firstReducer(state, { title }) {
           return { title }
         },
       },
@@ -188,7 +188,7 @@ test('twine / reducers / update state', t => {
             title: 'not set',
           },
           reducers: {
-            secondReducer({ state, title }) {
+            secondReducer(state, { title }) {
               return {
                 title,
               }
@@ -283,7 +283,7 @@ test('twine / scoped / reducers update local state effecting global state', t =>
             count: 1,
           },
           reducers: {
-            increment({ state }) {
+            increment(state) {
               return {
                 count: state.count + 1,
               }
@@ -324,7 +324,7 @@ test('twine / scoped / reducers receive local state', t => {
           count: 1,
         },
         reducers: {
-          increment({ state }) {
+          increment(state) {
             t.equal(state.count, 1, 'first level reducer received local state')
           },
         },
@@ -335,7 +335,7 @@ test('twine / scoped / reducers receive local state', t => {
               myState: 'hey',
             },
             reducers: {
-              update({ state }) {
+              update(state) {
                 t.equal(state.myState, 'hey', 'second level reducer received local state')
               },
             },
@@ -361,7 +361,7 @@ test('twine / scoped / reducers return local state', t => {
           count: 1,
         },
         reducers: {
-          increment({ state }) {
+          increment(state) {
             return { count: state.count + 1 }
           },
         },
