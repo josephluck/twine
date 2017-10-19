@@ -30,10 +30,10 @@
     "browserify": "^14.1.0",
     "tap-spec": "^4.1.1",
     "tape": "^4.6.3",
-    "ts-node": "^2.1.0",
+    "ts-node": "^3.3.0",
     "tsify": "^3.0.1",
     "tslint": "^4.4.2",
-    "typescript": "^2.2.1",
+    "typescript": "^2.5.3",
     "uglifyify": "^3.0.4",
     "uglifyjs": "^2.4.10"
   },

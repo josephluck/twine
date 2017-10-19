@@ -1,4 +1,4 @@
-import * as Twine from './types'
+import Twine from './types'
 
 export function onStateChange(plugins: Twine.Plugin[], state: any, prev: any, actions: any) {
   return plugins.map(plugin => {
@@ -26,8 +26,8 @@ export function onEffectCalled(plugins: Twine.Plugin[], prev: any, name: any, ar
   })
 }
 
-export function wrapReducer(plugins: Twine.Plugin[], reducer: Twine.ReducerImpl<any, any>) {
-  return plugins.reduce((prev: Twine.ReducerImpl<any, any>, plugin) => {
+export function wrapReducer(plugins: Twine.Plugin[], reducer: Twine.ReducerApi<any, any>) {
+  return plugins.reduce((prev: Twine.ReducerApi<any, any>, plugin) => {
     if (typeof plugin === 'object' && plugin.wrapReducers) {
       return plugin.wrapReducers(prev)
     } else {
@@ -36,8 +36,8 @@ export function wrapReducer(plugins: Twine.Plugin[], reducer: Twine.ReducerImpl<
   }, reducer)
 }
 
-export function wrapEffect(plugins: Twine.Plugin[], effect: Twine.EffectImpl<any, any, any>) {
-  return plugins.reduce((prev: Twine.EffectImpl<any, any, any>, plugin) => {
+export function wrapEffect(plugins: Twine.Plugin[], effect: Twine.EffectApi<any, any>) {
+  return plugins.reduce((prev: Twine.EffectApi<any, any>, plugin) => {
     if (typeof plugin === 'object' && plugin.wrapEffects) {
       return plugin.wrapEffects(prev)
     } else {

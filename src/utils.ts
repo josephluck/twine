@@ -1,4 +1,4 @@
-import * as Twine from './types'
+import Twine from './types'
 
 export function noop() {
   return null

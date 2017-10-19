@@ -1,4 +1,4 @@
-import * as Twine from './types'
+import Twine from './types'
 import * as pluginUtils from './plugins'
 import * as utils from './utils'
 
@@ -17,7 +17,7 @@ export default function twine<S, A>(model: Twine.ModelImpl<any, any, any>, opts?
   ) {
     const decoratedReducers = Object.keys(reducers || {}).map(key => {
       const reducer = reducers[key]
-      const decoratedReducer = function (params = {}) {
+      const decoratedReducer: Twine.ReducerApi<any, any> = function (params) {
         const previousState = Object.assign({}, state)
         const currentModelsState = path.length ? utils.getStateFromPath(state, path) : previousState
         const reducerResponse = reducer(currentModelsState, params)
@@ -26,7 +26,7 @@ export default function twine<S, A>(model: Twine.ModelImpl<any, any, any>, opts?
         state = utils.recursivelyUpdateComputedState(model, state, path)
         pluginUtils.onReducerCalled(plugins, state, previousState, reducer.name, params)
         pluginUtils.onStateChange(plugins, state, previousState, actions)
-        return Object.assign({}, currentModelsState, reducerResponse)
+        return newState
       }
       const wrappedReducer = pluginUtils.wrapReducer(plugins, decoratedReducer)
       Object.defineProperty(wrappedReducer, 'name', { value: reducer.name })
@@ -34,7 +34,7 @@ export default function twine<S, A>(model: Twine.ModelImpl<any, any, any>, opts?
     })
     const decoratedEffects = Object.keys(effects || {}).map(key => {
       const effect = effects[key]
-      const decoratedEffect = function (params = {}) {
+      const decoratedEffect: Twine.EffectApi<any> = function (params) {
         if (path.length) {
           const nestedModel = utils.retrieveNestedModel(model, path)
           const effectState = nestedModel.scoped ? utils.getStateFromPath(state, path) : state

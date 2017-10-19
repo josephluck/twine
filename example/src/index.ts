@@ -1,6 +1,6 @@
 import twine from '../../src'
 import log from '../../src/log'
-import * as Twine from '../../src/types'
+import Twine from '../../src/types'
 import html from 'yo-yo'
 
 interface State {
@@ -10,7 +10,7 @@ interface Reducers {
   updateTitle: Twine.Reducer<State, { title: string }>
 }
 interface Effects {
-  updateAsync: Twine.Effect<State, Actions, { title: string }>
+  reset: Twine.Effect0<State, Actions>
 }
 type Actions = Twine.Actions<Reducers, Effects>
 
@@ -19,15 +19,15 @@ const model: Twine.ModelImpl<State, Reducers, Effects> = {
     title: 'foo',
   },
   reducers: {
-    updateTitle({ title }) {
+    updateTitle(state, { title }) {
       return { title }
     },
   },
   effects: {
-    updateAsync(state, actions, { title }) {
+    reset(state, actions) {
       setTimeout(() => {
-        actions!.updateTitle({ title })
-      })
+        actions.updateTitle({ title: ' ' })
+      }, 100)
     },
   },
 }
@@ -39,10 +39,7 @@ const view = (state: State, actions: Actions) => html`
       value=${state.title}
       oninput=${(e: any) => actions.updateTitle({ title: e.target.value })}
     />
-    <input
-      value=${state.title}
-      oninput=${(e: any) => actions.updateAsync({ title: e.target.value })}
-    />
+    <button onclick=${() => actions.reset()}>Reset</button>
   </div>
 `
 
