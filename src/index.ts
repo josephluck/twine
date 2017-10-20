@@ -9,6 +9,7 @@ export default function twine<S, A>(model: Twine.ModelImpl<any, any, any>, opts?
   let plugins = typeof opts === 'object' && Array.isArray(opts) ? opts : [opts]
   let state = utils.createState(model)
   let actions = createActions(model, [])
+  let subscribers: Twine.Subscriber[] = []
 
   function decorateActions(
     reducers: Twine.ModelImpl<any, any, any>['reducers'],
@@ -26,6 +27,7 @@ export default function twine<S, A>(model: Twine.ModelImpl<any, any, any>, opts?
         state = utils.recursivelyUpdateComputedState(model, state, path)
         pluginUtils.onReducerCalled(plugins, state, previousState, reducer.name, params)
         pluginUtils.onStateChange(plugins, state, previousState, actions)
+        notifySubscribers(state, previousState, actions)
         return newState
       }
       const wrappedReducer = pluginUtils.wrapReducer(plugins, decoratedReducer)
@@ -65,8 +67,20 @@ export default function twine<S, A>(model: Twine.ModelImpl<any, any, any>, opts?
     return decorateActions(model.reducers, model.effects, path)
   }
 
+  function notifySubscribers(state: Twine.State, previousState: Twine.State, actions: Twine.Actions<any, any>) {
+    subscribers.forEach(subscriber => subscriber(state, previousState, actions))
+  }
+
+  function subscribe(fn: Twine.Subscriber): () => void {
+    subscribers = [...subscribers, fn]
+    return function unsubscribe() {
+      subscribers = subscribers.filter((_, i) => i !== subscribers.indexOf(fn))
+    }
+  }
+
   return {
     state,
     actions,
+    subscribe,
   } as Twine.Return<S, A>
 }

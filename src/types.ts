@@ -18,7 +18,7 @@ export declare namespace Twine {
   export interface Return<S, A> {
     state: S
     actions: A
-    subscribe: Subscriber<S, A>
+    subscribe: (fn: Subscriber<S, A>) => () => void
   }
   export type State = any
 

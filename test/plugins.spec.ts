@@ -1,6 +1,6 @@
 import * as test from 'tape'
 import twine from '../src/index'
-import * as Twine from '../src/types'
+import Twine from '../src/types'
 
 test('twine / plugins / accepts a single function plugin', t => {
   t.plan(1)
