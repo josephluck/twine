@@ -1,8 +1,8 @@
 import Twine from './types'
 
 export interface Log {
-  onReducerCalled: Twine.OnReducerCalled
-  onEffectCalled: Twine.OnEffectCalled
+  onReducerCalled: Twine.OnReducerCalled<any>
+  onEffectCalled: Twine.OnEffectCalled<any>
 }
 
 const log: Log = {
