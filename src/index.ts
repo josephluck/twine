@@ -20,7 +20,7 @@ export default function twine<S, A>(model: Twine.Model<any, any, any>, opts?: Tw
   ) {
     const decoratedReducers = Object.keys(reducers || {}).map(key => {
       const reducer = reducers[key]
-      const decoratedReducer: Twine.ReducerApi<any, any> = function (params) {
+      const decoratedReducer: Twine.ReducerApi<any, any> = function(params) {
         const previousState = Object.assign({}, state)
         const currentModelsState = path.length ? utils.getStateFromPath(state, path) : previousState
         const reducerResponse = reducer(currentModelsState, params)
@@ -38,7 +38,7 @@ export default function twine<S, A>(model: Twine.Model<any, any, any>, opts?: Tw
     })
     const decoratedEffects = Object.keys(effects || {}).map(key => {
       const effect = effects[key]
-      const decoratedEffect: Twine.EffectApi<any> = function (params) {
+      const decoratedEffect: Twine.EffectApi<any> = function(params) {
         if (path.length) {
           const nestedModel = utils.retrieveNestedModel(model, path)
           const effectState = nestedModel.scoped ? utils.getStateFromPath(state, path) : state
@@ -57,7 +57,10 @@ export default function twine<S, A>(model: Twine.Model<any, any, any>, opts?: Tw
     return decoratedReducers.concat(decoratedEffects).reduce(utils.arrayToObj, [])
   }
 
-  function createActions(model: Twine.Model<any, any, any>, path: string[]): Twine.Actions<any, any> {
+  function createActions(
+    model: Twine.Model<any, any, any>,
+    path: string[],
+  ): Twine.Actions<any, any> {
     if (model.models) {
       const child = Object.keys(model.models)
         .map(key => ({
@@ -69,7 +72,11 @@ export default function twine<S, A>(model: Twine.Model<any, any, any>, opts?: Tw
     return decorateActions(model.reducers, model.effects, path)
   }
 
-  function notifySubscribers(state: Twine.State, previousState: Twine.State, actions: Twine.Actions<any, any>) {
+  function notifySubscribers(
+    state: Twine.State,
+    previousState: Twine.State,
+    actions: Twine.Actions<any, any>,
+  ) {
     subscribers.forEach(subscriber => subscriber(state, previousState, actions))
   }
 
