@@ -1,6 +1,6 @@
 import Twine from './types'
 
-export function noop() {
+export function noop(): null {
   return null
 }
 

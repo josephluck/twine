@@ -20,7 +20,7 @@ export default function twine<S, A>(model: Twine.Model<any, any, any>, opts?: Tw
   ) {
     const decoratedReducers = Object.keys(reducers || {}).map(key => {
       const reducer = reducers[key]
-      const decoratedReducer: Twine.ReducerApi<any, any> = function(params) {
+      const decoratedReducer: Twine.ReducerApi<any, any> = function (params) {
         const previousState = Object.assign({}, state)
         const currentModelsState = path.length ? utils.getStateFromPath(state, path) : previousState
         const reducerResponse = reducer(currentModelsState, params)
@@ -38,7 +38,7 @@ export default function twine<S, A>(model: Twine.Model<any, any, any>, opts?: Tw
     })
     const decoratedEffects = Object.keys(effects || {}).map(key => {
       const effect = effects[key]
-      const decoratedEffect: Twine.EffectApi<any> = function(params) {
+      const decoratedEffect: Twine.EffectApi<any> = function (params) {
         if (path.length) {
           const nestedModel = utils.retrieveNestedModel(model, path)
           const effectState = nestedModel.scoped ? utils.getStateFromPath(state, path) : state
@@ -77,7 +77,7 @@ export default function twine<S, A>(model: Twine.Model<any, any, any>, opts?: Tw
     previousState: Twine.State,
     actions: Twine.Actions<any, any>,
   ) {
-    subscribers.forEach(subscriber => subscriber(state, previousState, actions))
+    subscribers.forEach(subscriber => subscriber(state, previousState, actions as any))
   }
 
   function subscribe(fn: Twine.Subscriber<S, A>): () => void {
