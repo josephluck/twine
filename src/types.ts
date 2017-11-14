@@ -1,19 +1,19 @@
 export declare namespace Twine {
-  export type Subscriber<S = State, A = any> = (state: S, prev: S, actions: A) => any
-  export type OnReducerCalled = (state: State, prev: State, name: string, ...args: any[]) => any
-  export type OnEffectCalled = (prev: State, name: string, ...args: any[]) => any
+  export type Subscriber<S, A> = (state: S, prev: S, actions: A) => any
+  export type OnReducerCalled<S> = (state: S, prev: S, name: string, ...args: any[]) => any
+  export type OnEffectCalled<S> = (prev: S, name: string, ...args: any[]) => any
 
-  export type Plugin =
-    | Subscriber
+  export type Plugin<S, A> =
+    | Subscriber<S, A>
     | {
-      onStateChange?: Subscriber
-      onReducerCalled?: OnReducerCalled
-      onEffectCalled?: OnEffectCalled
+      onStateChange?: Subscriber<S, A>
+      onReducerCalled?: OnReducerCalled<S>
+      onEffectCalled?: OnEffectCalled<S>
       wrapReducers?: (reducer: ReducerApi<any, any>) => ReducerApi<any, any>
       wrapEffects?: (effect: EffectApi<any, any>) => EffectApi<any, any>
     }
 
-  export type Opts = Plugin | Plugin[]
+  export type Opts<S, A> = Plugin<S, A> | Plugin<S, A>[]
 
   export interface Return<S, A> {
     state: S
@@ -49,7 +49,7 @@ export declare namespace Twine {
   export type ReducersApi<R extends any> = {[P in keyof R]: R[P]['api']}
   export type EffectsApi<E extends any> = {[P in keyof E]: E[P]['api']}
 
-  export interface ModelImpl<
+  export interface Model<
     S extends State,
     R extends Record<any, Reducer<S, any>>,
     E extends Record<any, Effect<any, any>>
@@ -59,7 +59,7 @@ export declare namespace Twine {
     effects?: EffectsImpl<E>
     scoped?: boolean
     computed?: Computed<S>
-    models?: Record<string, ModelImpl<any, any, any>>
+    models?: Record<string, Model<any, any, any>>
   }
   export interface ModelApi<S, A> {
     state: S

@@ -8,7 +8,7 @@ export function arrayToObj(curr: any, prev: any): any {
   return Object.assign({}, curr, prev)
 }
 
-export function mergeState(model: Twine.ModelImpl<any, any, any>): any {
+export function mergeState(model: Twine.Model<any, any, any>): any {
   const models = model.models
   if (models) {
     let child = Object.keys(models)
@@ -26,15 +26,15 @@ export function mergeState(model: Twine.ModelImpl<any, any, any>): any {
   return Object.assign({}, localState, computedState)
 }
 
-export function createState(model: Twine.ModelImpl<any, any, any>) {
+export function createState(model: Twine.Model<any, any, any>) {
   return mergeState(model)
 }
 
 export function retrieveNestedModel(
-  model: Twine.ModelImpl<any, any, any>,
+  model: Twine.Model<any, any, any>,
   path: string[],
   index: number = 0,
-): Twine.ModelImpl<any, any, any> {
+): Twine.Model<any, any, any> {
   if (model.models) {
     let currModel = model.models[path[index]]
     if (currModel && currModel.models && currModel.models[path[index + 1]]) {
@@ -65,7 +65,7 @@ export function updateStateAtPath(state: Twine.State, path: string[], value: any
 }
 
 export function recursivelyUpdateComputedState(
-  model: Twine.ModelImpl<any, any, any>,
+  model: Twine.Model<any, any, any>,
   state: Twine.State,
   path: string[],
 ): Twine.State {

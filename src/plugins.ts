@@ -1,6 +1,6 @@
 import Twine from './types'
 
-export function onStateChange(plugins: Twine.Plugin[], state: any, prev: any, actions: any) {
+export function onStateChange<S, A>(plugins: Twine.Plugin<S, A>[], state: any, prev: any, actions: any) {
   return plugins.map(plugin => {
     if (typeof plugin === 'function') {
       plugin(state, prev, actions)
@@ -10,7 +10,7 @@ export function onStateChange(plugins: Twine.Plugin[], state: any, prev: any, ac
   })
 }
 
-export function onReducerCalled(plugins: Twine.Plugin[], state: any, prev: any, name: any, args: any) {
+export function onReducerCalled<S, A>(plugins: Twine.Plugin<S, A>[], state: any, prev: any, name: any, args: any) {
   return plugins.map(plugin => {
     if (typeof plugin === 'object' && plugin.onReducerCalled) {
       plugin.onReducerCalled.apply(null, [state, prev, name].concat(args))
@@ -18,7 +18,7 @@ export function onReducerCalled(plugins: Twine.Plugin[], state: any, prev: any, 
   })
 }
 
-export function onEffectCalled(plugins: Twine.Plugin[], prev: any, name: any, args: any) {
+export function onEffectCalled<S, A>(plugins: Twine.Plugin<S, A>[], prev: any, name: any, args: any) {
   return plugins.map(plugin => {
     if (typeof plugin === 'object' && plugin.onEffectCalled) {
       plugin.onEffectCalled.apply(null, [prev, name].concat(args))
@@ -26,7 +26,7 @@ export function onEffectCalled(plugins: Twine.Plugin[], prev: any, name: any, ar
   })
 }
 
-export function wrapReducer(plugins: Twine.Plugin[], reducer: Twine.ReducerApi<any, any>) {
+export function wrapReducer<S, A>(plugins: Twine.Plugin<S, A>[], reducer: Twine.ReducerApi<any, any>) {
   return plugins.reduce((prev: Twine.ReducerApi<any, any>, plugin) => {
     if (typeof plugin === 'object' && plugin.wrapReducers) {
       return plugin.wrapReducers(prev)
@@ -36,7 +36,7 @@ export function wrapReducer(plugins: Twine.Plugin[], reducer: Twine.ReducerApi<a
   }, reducer)
 }
 
-export function wrapEffect(plugins: Twine.Plugin[], effect: Twine.EffectApi<any, any>) {
+export function wrapEffect<S, A>(plugins: Twine.Plugin<S, A>[], effect: Twine.EffectApi<any, any>) {
   return plugins.reduce((prev: Twine.EffectApi<any, any>, plugin) => {
     if (typeof plugin === 'object' && plugin.wrapEffects) {
       return plugin.wrapEffects(prev)
