@@ -1,232 +1,95 @@
-export type Subscriber = (state: State, prev: State, actions: any) => any
-export type OnReducerCalled = (state: State, prev: State, name: string, ...args: any[]) => any
-export type OnEffectCalled = (prev: State, name: string, ...args: any[]) => any
+import Twine from './types'
+import * as pluginUtils from './plugins'
+import * as utils from './utils'
 
-export type Plugin = Subscriber | {
-  onStateChange?: Subscriber,
-  onReducerCalled?: OnReducerCalled,
-  onEffectCalled?: OnEffectCalled,
-}
+export { default as Twine } from './types'
 
-export type Opts = Plugin | Plugin[]
-
-export interface Model {
-  state?: any
-  computed?: (state: any) => any
-  scoped?: boolean
-  reducers?: {
-    [key: string]: (state: any, ...args: any[]) => any,
-  }
-  effects?: {
-    [key: string]: (state: any, actions: any, ...args: any[]) => any,
-  }
-  models?: {
-    [key: string]: Model,
-  }
-}
-
-export interface State {
-  [key: string]: State | any
-}
-
-function noop() {
-  return null
-}
-
-function arrayToObj(curr, prev) {
-  return Object.assign({}, curr, prev)
-}
-
-export function mergeState(model: Model) {
-  if (model.models) {
-    let child = Object.keys(model.models).map(key => ({
-      [key]: mergeState(model.models[key]),
-    })).reduce(arrayToObj, {})
-
-    const localState = Object.assign({}, model['state'], child)
-    const computedState = model.computed ? model.computed(localState) : {}
-    return Object.assign({}, localState, computedState)
-  }
-  const localState = model['state']
-  const computedState = model.computed ? model.computed(localState) : {}
-  return Object.assign({}, localState, computedState)
-}
-
-export function createState(model: Model) {
-  return mergeState(model)
-}
-
-export function retrieveNestedModel(model: Model, path: string[], index: number = 0) {
-  if (model.models) {
-    let currModel = model.models[path[index]]
-    if (currModel && currModel.models && currModel.models[path[index + 1]]) {
-      return retrieveNestedModel(currModel, path, index + 1)
-    }
-    return currModel
-  }
-  return model
-}
-
-export function getStateFromPath(state: State, path: string[]) {
-  if (path.length) {
-    return getStateFromPath(state[path[0]], path.slice(1))
-  }
-  return state
-}
-
-export function updateStateAtPath(state: State, path: string[], value: any) {
-  if (path.length > 0) {
-    let key = path[0]
-    if (path.length > 1) {
-      state[key] = updateStateAtPath(state[key], path.slice(1), value)
-    } else {
-      state[key] = value
-    }
-  }
-  return state
-}
-
-export function recursivelyUpdateComputedState(model: Model, state: State, path: string[]) {
-  const currentModel = retrieveNestedModel(model, path)
-  const currentState = getStateFromPath(state, path)
-  const computedState = currentModel
-    ? currentModel.computed ? currentModel.computed(currentState) : {}
-    : model.computed ? model.computed(currentState) : {}
-  if (path.length > 0) {
-    const newState = updateStateAtPath(state, path, {
-      ...currentState,
-      ...computedState,
-    })
-    const newPath = path.slice(0, path.length - 1)
-    return recursivelyUpdateComputedState(model, newState, newPath)
-  } else {
-    const newState = {
-      ...currentState,
-      ...computedState,
-    }
-    return newState
-  }
-}
-
-export function onStateChange (plugins: Plugin[], state, prev, actions) {
-  return plugins.map(plugin => {
-    if (typeof plugin === 'function') {
-      plugin(state, prev, actions)
-    } else if (typeof plugin === 'object' && plugin.onStateChange) {
-      plugin.onStateChange(state, prev, actions)
-    }
-  })
-}
-
-export function onReducerCalled (plugins, state, prev, name, args) {
-  return plugins.map(plugin => {
-    if (typeof plugin === 'object' && plugin.onReducerCalled) {
-      plugin.onReducerCalled.apply(null, [state, prev, name].concat(args))
-    }
-  })
-}
-
-export function onEffectCalled (plugins, prev, name, args) {
-  return plugins.map(plugin => {
-    if (typeof plugin === 'object' && plugin.onEffectCalled) {
-      plugin.onEffectCalled.apply(null, [prev, name].concat(args))
-    }
-  })
-}
-
-export function wrapReducer (plugins, reducer) {
-  return plugins.reduce((prev, plugin) => {
-    if (typeof plugin === 'object' && plugin.wrapReducers) {
-      return plugin.wrapReducers(prev)
-    } else {
-      return prev
-    }
-  }, reducer)
-}
-
-export function wrapEffect (plugins, effect) {
-  return plugins.reduce((prev, plugin) => {
-    if (typeof plugin === 'object' && plugin.wrapEffects) {
-      return plugin.wrapEffects(prev)
-    } else {
-      return prev
-    }
-  }, effect)
-}
-
-export default function twine (opts?: Opts) {
+export default function twine<S, A>(model: Twine.Model<any, any, any>, opts?: Twine.Opts<S, A>) {
   if (!opts) {
-    opts = noop
+    opts = utils.noop
   }
   let plugins = typeof opts === 'object' && Array.isArray(opts) ? opts : [opts]
+  let state = utils.createState(model)
+  let actions = createActions(model, [])
+  let subscribers: Twine.Subscriber<S, A>[] = []
 
-  return function output (model: Model) {
-    let state = createState(model)
-    let actions = createActions(model, [])
-
-    function decorateActions (reducers: Model['reducers'], effects: Model['effects'], path: string[]) {
-      const decoratedReducers = Object.keys(reducers || {}).map(key => {
-        const reducer = reducers[key]
-        const decoratedReducer = function () {
-          // Call reducer & update the global state
-          const currentModel = retrieveNestedModel(model, path) || model
-          const previousState = Object.assign({}, state)
-          const currentModelsState = path.length ? getStateFromPath(state, path) : previousState
-          const reducerArgs = [currentModelsState].concat(Array.prototype.slice.call(arguments))
-          const reducerResponse = reducer.apply(null, reducerArgs)
-          const newState = Object.assign({}, currentModelsState, reducerResponse)
-          state = path.length ? updateStateAtPath(state, path, newState) : newState
-          state = recursivelyUpdateComputedState(model, state, path)
-
-          // Plugins
-          const pluginArgs = Array.prototype.slice.call(arguments)
-          onReducerCalled(plugins, state, previousState, reducer.name, pluginArgs)
-          onStateChange(plugins, state, previousState, actions)
-          return path.length && currentModel.scoped
-            ? Object.assign({}, currentModelsState, reducerResponse)
-            : state
-        }
-        const wrappedReducer = wrapReducer(plugins, decoratedReducer)
-        Object.defineProperty(wrappedReducer, 'name', { value: reducer.name })
-        return { [key]: wrappedReducer }
-      })
-      const decoratedEffects = Object.keys(effects || {}).map(key => {
-        const effect = effects[key]
-        const decoratedEffect = function () {
-          if (path.length) {
-            const nestedModel = retrieveNestedModel(model, path)
-            const effectState = nestedModel.scoped ? getStateFromPath(state, path) : state
-            const effectActions = nestedModel.scoped ? getStateFromPath(actions, path) : actions
-            const args = Array.prototype.slice.call(arguments)
-            const effectArgs = [effectState, effectActions].concat(args)
-            onEffectCalled(plugins, state, effect.name, args)
-            return effects[key].apply(null, effectArgs)
-          }
-          const args = Array.prototype.slice.call(arguments)
-          const effectArgs = [state, actions].concat(args)
-          onEffectCalled(plugins, state, effect.name, args)
-          return effects[key].apply(null, effectArgs)
-        }
-        const wrappedEffect = wrapEffect(plugins, decoratedEffect)
-        Object.defineProperty(wrappedEffect, 'name', { value: effect.name })
-        return { [key]: wrappedEffect }
-      })
-      return decoratedReducers.concat(decoratedEffects).reduce(arrayToObj, {})
-    }
-
-    function createActions (model: Model, path: string[]) {
-      if (model.models) {
-        const child = Object.keys(model.models).map(key => ({
-          [key]: createActions(model.models[key], path.concat(key)),
-        })).reduce(arrayToObj, {})
-        return Object.assign({}, decorateActions(model.reducers, model.effects, path), child)
+  function decorateActions(
+    reducers: Twine.Model<any, any, any>['reducers'],
+    effects: Twine.Model<any, any, any>['effects'],
+    path: string[],
+  ) {
+    const decoratedReducers = Object.keys(reducers || {}).map(key => {
+      const reducer = reducers[key]
+      const decoratedReducer: Twine.ReducerApi<any, any> = function (params) {
+        const previousState = Object.assign({}, state)
+        const currentModelsState = path.length ? utils.getStateFromPath(state, path) : previousState
+        const reducerResponse = reducer(currentModelsState, params)
+        const newState = Object.assign({}, currentModelsState, reducerResponse)
+        state = path.length ? utils.updateStateAtPath(state, path, newState) : newState
+        state = utils.recursivelyUpdateComputedState(model, state, path)
+        pluginUtils.onReducerCalled<S, A>(plugins, state, previousState, reducer.name, params)
+        pluginUtils.onStateChange<S, A>(plugins, state, previousState, actions)
+        notifySubscribers(state, previousState, actions)
+        return newState
       }
-      return decorateActions(model.reducers, model.effects, path)
-    }
+      const wrappedReducer = pluginUtils.wrapReducer<S, A>(plugins, decoratedReducer)
+      Object.defineProperty(wrappedReducer, 'name', { value: reducer.name })
+      return { [key]: wrappedReducer }
+    })
+    const decoratedEffects = Object.keys(effects || {}).map(key => {
+      const effect = effects[key]
+      const decoratedEffect: Twine.EffectApi<any> = function (params) {
+        if (path.length) {
+          const nestedModel = utils.retrieveNestedModel(model, path)
+          const effectState = nestedModel.scoped ? utils.getStateFromPath(state, path) : state
+          const effectActions = nestedModel.scoped ? utils.getStateFromPath(actions, path) : actions
+          pluginUtils.onEffectCalled<S, A>(plugins, state, effect.name, params)
+          return effect(effectState, effectActions, params)
+        } else {
+          pluginUtils.onEffectCalled<S, A>(plugins, state, effect.name, params)
+          return effect(state, actions, params)
+        }
+      }
+      const wrappedEffect = pluginUtils.wrapEffect<S, A>(plugins, decoratedEffect)
+      Object.defineProperty(wrappedEffect, 'name', { value: effect.name })
+      return { [key]: wrappedEffect }
+    })
+    return decoratedReducers.concat(decoratedEffects).reduce(utils.arrayToObj, [])
+  }
 
-    return {
-      state,
-      actions,
+  function createActions(
+    model: Twine.Model<any, any, any>,
+    path: string[],
+  ): Twine.Actions<any, any> {
+    if (model.models) {
+      const child = Object.keys(model.models)
+        .map(key => ({
+          [key]: createActions(model.models![key], path.concat(key)),
+        }))
+        .reduce(utils.arrayToObj, {})
+      return Object.assign({}, decorateActions(model.reducers, model.effects, path), child)
+    }
+    return decorateActions(model.reducers, model.effects, path)
+  }
+
+  function notifySubscribers(
+    state: Twine.State,
+    previousState: Twine.State,
+    actions: Twine.Actions<any, any>,
+  ) {
+    subscribers.forEach(subscriber => subscriber(state, previousState, actions as any))
+  }
+
+  function subscribe(fn: Twine.Subscriber<S, A>): () => void {
+    subscribers = [...subscribers, fn]
+    return function unsubscribe() {
+      subscribers = subscribers.filter((_, i) => i !== subscribers.indexOf(fn))
     }
   }
+
+  return {
+    state,
+    actions,
+    subscribe,
+  } as Twine.Return<S, A>
 }

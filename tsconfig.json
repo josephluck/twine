@@ -16,9 +16,10 @@
 		],
 		"noUnusedLocals": true,
 		"strictNullChecks": false,
-		"removeComments": false
+		"removeComments": false,
+		"noImplicitAny": true
 	},
 	"include": [
 		"src/**/*"
-  ]
+	]
 }

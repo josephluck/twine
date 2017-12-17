@@ -1,5 +1,5 @@
 import * as test from 'tape'
-import {updateStateAtPath, getStateFromPath} from '../src/index'
+import {updateStateAtPath, getStateFromPath} from '../src/utils'
 
 test('twine / utils / gets nested state given array of keys', function (t) {
   t.plan(1)

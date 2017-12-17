@@ -5,3 +5,4 @@ npm-debug.log*
 coverage.json
 .DS_Store
 *.swp
+lib/

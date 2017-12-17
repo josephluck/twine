@@ -1,6 +1,6 @@
 {
   "name": "twine-js",
-  "version": "1.9.3",
+  "version": "2.0.0",
   "description": "Functional front-end state management",
   "main": "./lib/index.js",
   "files": [
@@ -17,7 +17,8 @@
     "dist": "rm -rf ./lib && mkdir lib && tsc && npm run browserify && npm run minify",
     "browserify": "browserify -g babelify lib/index.js -o lib/bundle.js",
     "minify": "uglifyjs lib/bundle.js -c -m -o lib/bundle.min.js",
-    "deploy": "npm run dist && npm publish"
+    "deploy": "npm run dist && npm publish",
+    "format": "prettier --write \"./src/**/*.{ts,tsx}\""
   },
   "author": "Joseph Luck",
   "license": "ISC",
@@ -29,12 +30,15 @@
     "browserify": "^14.1.0",
     "tap-spec": "^4.1.1",
     "tape": "^4.6.3",
-    "ts-node": "^2.1.0",
+    "ts-node": "^3.3.0",
     "tsify": "^3.0.1",
     "tslint": "^4.4.2",
-    "tslint-config-standard": "^4.0.0",
-    "typescript": "^2.2.1",
+    "typescript": "^2.5.3",
     "uglifyify": "^3.0.4",
     "uglifyjs": "^2.4.10"
+  },
+  "dependencies": {
+    "prettier": "^1.7.4",
+    "tslint-config-prettier": "^1.5.0"
   }
 }

@@ -1,15 +1,28 @@
-export default {
-  onReducerCalled (state, prev, name, ...args) {
-    console.groupCollapsed(`🚀 Reducer: ${name}`)
-    console.log('📦 prev:         ', prev)
-    console.log.apply(this, ['⚡️ arguments:    '].concat(args))
-    console.log('📦 state:        ', state)
+import Twine from './types'
+
+export interface Log {
+  onReducerCalled: Twine.OnReducerCalled<any>
+  onEffectCalled: Twine.OnEffectCalled<any>
+}
+
+const log: Log = {
+  onReducerCalled(nextState, previousState, name, params) {
+    console.groupCollapsed(`✨ Reducer: ${name}`)
+    console.log('📦 previous state:  ', previousState)
+    if (params) {
+      console.log('⚡️ arguments:        ', params)
+    }
+    console.log('📦 next state:      ', nextState)
     console.groupEnd()
   },
-  onEffectCalled (state, name, ...args) {
+  onEffectCalled(state, name, params) {
     console.groupCollapsed(`🚀 Effect:  ${name}`)
-    console.log('📦 state:         ', state)
-    console.log.apply(this, ['⚡️ arguments:    '].concat(args))
+    console.log('📦 state:           ', state)
+    if (params) {
+      console.log('⚡️ arguments:        ', params)
+    }
     console.groupEnd()
   },
 }
+
+export default log
