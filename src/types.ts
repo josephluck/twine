@@ -19,6 +19,8 @@ export declare namespace Twine {
     state: State
     actions: Actions
     subscribe: (callback: Subscriber<State, Actions>) => () => void
+    getState: () => State
+    replaceState: (newState: State) => void
   }
   export type State = any
 

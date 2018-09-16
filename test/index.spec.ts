@@ -4,7 +4,7 @@ import twine from '../src/index'
 // app examples
 test('twine / app / example 1', t => {
   t.plan(3)
-  const subscription = function (state) {
+  const subscription = function(state) {
     t.equal(state.title, 'bar')
   }
   const model = {
@@ -20,7 +20,7 @@ test('twine / app / example 1', t => {
     },
     effects: {
       async(state, actions, { timeout }) {
-        setTimeout(function () {
+        setTimeout(function() {
           t.equal(typeof actions.update, 'function', 'effect called and received actions')
           t.equal(state.title, 'bar', 'effect called and received latest state')
         }, timeout)
@@ -140,6 +140,3 @@ test('twine / return / actions contain reducers', t => {
   t.equal(typeof app.actions, 'object', 'actions is an object')
   t.equal(typeof app.actions.myReducer, 'function', 'reducer exists inside actions')
 })
-test.skip('skip / twine / return / state is available')
-
-test.skip('skip / twine / scoped / hooks still work as expected with global state', t => { })

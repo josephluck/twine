@@ -1,6 +1,5 @@
 import * as test from 'tape'
 import twine from '../src/index'
-import Twine from '../src/types'
 
 test('twine / plugins / accepts a single function plugin', t => {
   t.plan(1)
@@ -143,7 +142,7 @@ test('twine / plugins / onEffectCalled plugin', t => {
       t.equal(params.title, 'set again', 'onEffectCalled plugin received correct arguments')
       t.equal(name, 'setTitleAsync', 'onEffectCalled plugin received correct effect name')
     },
-  } as Twine.Plugin
+  }
   const app = twine<any, any>(
     {
       state: {
@@ -176,7 +175,7 @@ test('twine / plugins / onStateChange plugin', t => {
       t.equal(prev.title, 'not set', 'onStateChange plugin received correct prev state')
       t.equal(state.title, 'set', 'onStateChange plugin received correct new state')
     },
-  } as Twine.Plugin
+  }
   const app = twine<any, any>(
     {
       state: {
@@ -206,12 +205,12 @@ test('twine / plugins / wrapReducers plugin', t => {
   const plugins = {
     wrapReducers(reducer) {
       t.pass('wrap reducers called with reducer')
-      return function (params) {
+      return function(params) {
         t.pass('wrapped reducer called')
         return reducer(Object.assign({ abc: 123 }, params, {}))
       }
     },
-  } as Twine.Plugin
+  }
   const app = twine<any, any>(
     {
       state: {
@@ -237,12 +236,12 @@ test('twine / plugins / wrapEffects plugin', t => {
   t.plan(4)
   const plugins = {
     wrapEffects(effect) {
-      return function (params) {
+      return function(params) {
         t.pass('wrapped effect called')
         return effect(Object.assign({ abc: 123 }, params, {}))
       }
     },
-  } as Twine.Plugin
+  }
   const app = twine<any, any>(
     {
       state: {
@@ -266,16 +265,16 @@ test('twine / plugins / wrapped effects and reducers retain their function names
   t.plan(2)
   const plugins = {
     wrapReducers(reducer) {
-      return function (params) {
+      return function(params) {
         return reducer(params)
       }
     },
     wrapEffects(effect) {
-      return function (params) {
+      return function(params) {
         return effect(params)
       }
     },
-  } as Twine.Plugin
+  }
   const app = twine<any, any>(
     {
       state: {

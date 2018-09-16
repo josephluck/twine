@@ -87,9 +87,19 @@ export default function twine<S, A>(model: Twine.Model<any, any, any>, opts?: Tw
     }
   }
 
+  function getState(): S {
+    return state
+  }
+
+  function replaceState(newState: S) {
+    state = newState
+  }
+
   return {
     state,
     actions,
     subscribe,
+    getState,
+    replaceState,
   } as Twine.Return<S, A>
 }
