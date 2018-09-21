@@ -8,3 +8,13 @@ Twine is a functional state management library akin to redux. Using Typescript, 
 
 ## Examples:
 The easiest way to see the API is by looking at [the tests](test)!
+
+## Todo:
+Consider using type inference for return values for effects a'la: 
+
+```
+export interface ThunkDispatch<S, E, A extends Action> {
+  <T extends A>(action: T): T;
+  <R>(asyncAction: ThunkAction<R, S, E, A>): R;
+}
+```
